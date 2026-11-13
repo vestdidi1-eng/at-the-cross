@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1424">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="At the Cross">
+<title>Leave It at the Cross</title>
+<meta name="description" content="A quiet place to lay your burdens down, give thanks, and pray for the people you love.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#10142A; --plum:#3A2C4A; --rose:#A8636A; --gold:#F0C979; --gold-deep:#D9A441;
+    --linen:#F5EEE1; --linen-2:#ECE2CF; --ink:#2B2420; --ink-2:rgba(43,36,32,.66); --ink-3:rgba(43,36,32,.42);
+    --moon:rgba(245,238,225,.74); --pray:#BFD1F2;
+    --serif:'Libre Caslon Text',Georgia,'Times New Roman',serif;
+    --display:'Libre Caslon Display','Libre Caslon Text',Georgia,serif;
+    --sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
+    --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+    --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
+    --ease:cubic-bezier(.2,.8,.2,1);
+    --paper-grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  html{overflow-x:hidden;background:var(--night);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  html.locked,html.locked body{overflow:hidden}
+  body{min-height:100vh;min-height:100dvh;font-family:var(--sans);color:var(--linen);overflow-x:hidden;overflow-x:clip;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+  button,input,textarea{font:inherit;color:inherit}
+  button{touch-action:manipulation}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
+
+  /* Sky */
+  .bg,.bg-dawn,.grain{position:fixed;inset:0;pointer-events:none}
+  .bg{z-index:-3;background:
+      radial-gradient(120% 60% at 50% 108%, rgba(168,99,106,.55) 0%, rgba(168,99,106,0) 60%),
+      linear-gradient(180deg,#0c1024 0%,#171a35 30%,#2c2442 58%,#4a3348 80%,#6e4650 100%)}
+  .bg-dawn{z-index:-2;opacity:0;transition:opacity 2.6s ease;background:
+      radial-gradient(110% 55% at 50% 105%, rgba(240,180,120,.75) 0%, rgba(240,180,120,0) 62%),
+      linear-gradient(180deg,#1a1f3d 0%,#3a2f55 38%,#8c5a66 72%,#d99a74 100%)}
+  body.dawn .bg-dawn{opacity:1}
+  .grain{z-index:-1;opacity:.5;mix-blend-mode:soft-light;background-image:var(--paper-grain)}
+  canvas#sky{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+  canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+
+  /* Top bar */
+  .topbar{position:fixed;top:0;left:0;right:0;z-index:9;display:flex;justify-content:space-between;align-items:center;
+    padding:calc(var(--sat) + 10px) calc(var(--sar) + 14px) 8px calc(var(--sal) + 14px);pointer-events:none}
+  .pill{pointer-events:auto;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 15px;border-radius:999px;
+    border:1px solid rgba(240,201,121,.22);background:rgba(16,20,42,.42);color:var(--gold);
+    -webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2);font-size:14px;font-weight:500;cursor:pointer;
+    transition:background .2s,border-color .2s}
+  .pill:hover{border-color:rgba(240,201,121,.45)}
+  .pill:active{background:rgba(16,20,42,.7)}
+  .jcount{min-width:20px;padding:1px 7px;border-radius:999px;background:rgba(240,201,121,.16);font-size:12px;text-align:center;font-variant-numeric:tabular-nums}
+  .jcount:empty{display:none}
+
+  main{position:relative;z-index:2;margin:0 auto;max-width:600px;display:flex;flex-direction:column;align-items:center;
+    padding:calc(var(--sat) + 70px) calc(var(--sar) + 18px) calc(var(--sab) + 40px) calc(var(--sal) + 18px)}
+
+  /* Title */
+  .title{text-align:center}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,9.4vw,52px);line-height:1.02;letter-spacing:-.005em;color:#F6E6C4;
+    text-shadow:0 0 28px rgba(240,201,121,.25)}
+  .sub{margin-top:12px;font-family:var(--serif);font-style:italic;font-size:clamp(15.5px,4.1vw,18px);line-height:1.5;color:var(--moon);max-width:30ch;margin-left:auto;margin-right:auto}
+  .sub cite{display:block;margin-top:4px;font-style:normal;font-family:var(--sans);font-size:12.5px;color:rgba(245,238,225,.48);letter-spacing:.02em}
+
+  /* Scene */
+  .scene{position:relative;width:min(520px,100%);aspect-ratio:520/400;max-height:44vh;max-height:44svh;margin-top:6px}
+  .halo{position:absolute;left:50%;top:30%;width:110%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle,rgba(240,201,121,.34) 0%,rgba(240,201,121,.1) 32%,rgba(240,201,121,0) 62%);
+    opacity:.8;transition:opacity 1.2s ease,transform 1.2s ease;pointer-events:none}
+  .halo.bright{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+  .scene svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .scene svg .rays{transform-origin:260px 114px;animation:spin 160s linear infinite;opacity:.38}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #emberHit{cursor:pointer;outline:none}
+  #emberG circle,#emberPG circle{transform-box:fill-box;transform-origin:center;animation:flicker 3.5s ease-in-out infinite}
+  #emberG circle.born,#emberPG circle.born{animation:born .9s ease-out, flicker 3.5s ease-in-out .9s infinite}
+  @keyframes flicker{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+  @keyframes born{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+
+  /* Verse after release */
+  .verse{position:relative;z-index:1;max-width:34ch;text-align:center;margin:4px 0 0;max-height:0;opacity:0;overflow:hidden;transition:opacity 1.4s ease,max-height .8s var(--ease),margin .8s var(--ease)}
+  .verse.show{opacity:1;max-height:360px;margin:6px 0 22px}
+  .verse .after{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--gold);margin-bottom:10px}
+  .verse blockquote{font-family:var(--serif);font-size:clamp(19px,5vw,23px);line-height:1.5;color:#FBF4E6}
+  .verse cite{display:block;margin-top:10px;font-style:normal;font-family:var(--sans);font-size:13px;color:rgba(245,238,225,.55);letter-spacing:.02em}
+
+  /* The sheet: paper tabs + card */
+  .sheet{position:relative;z-index:1;width:100%;margin-top:10px;filter:drop-shadow(0 28px 40px rgba(6,6,18,.5)) drop-shadow(0 6px 12px rgba(6,6,18,.25))}
+  .modes{display:flex;gap:4px;padding:0 10px}
+  .modes button{flex:1;min-height:44px;padding:0 6px;border:none;border-radius:12px 12px 0 0;cursor:pointer;
+    background:rgba(245,238,225,.16);color:rgba(245,238,225,.82);font-size:14px;font-weight:500;letter-spacing:.005em;
+    transition:background .25s,color .25s}
+  .modes button:hover{background:rgba(245,238,225,.24)}
+  .modes button[aria-pressed="true"]{background:var(--linen);background-image:var(--paper-grain);color:var(--ink)}
+  .card{width:100%;background:var(--linen);background-image:var(--paper-grain);color:var(--ink);border-radius:14px;padding:22px 20px 18px;
+    transition:opacity .5s ease,transform .5s var(--ease)}
+  .card.away{opacity:0;transform:translateY(14px);pointer-events:none}
+  .card .q{display:block;font-family:var(--serif);font-size:21px;line-height:1.3;font-weight:400;margin-bottom:12px;color:var(--ink)}
+  .who{margin-bottom:16px}
+  .who input{width:100%;min-height:46px;border:1px solid rgba(43,36,32,.16);border-radius:10px;background:rgba(255,255,255,.55);padding:0 14px;font-family:var(--serif);font-size:18px;color:var(--ink);-webkit-appearance:none;appearance:none}
+  .who input::placeholder{color:var(--ink-3);font-style:italic}
+  .who input:focus{outline:2px solid rgba(217,164,65,.55);outline-offset:1px}
+  .chips,.people{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -20px 14px;padding:2px 20px 4px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scroll-padding-inline:20px}
+  .people{margin:10px -20px 0}
+  .chips::-webkit-scrollbar,.people::-webkit-scrollbar{display:none}
+  .chip{flex:none;scroll-snap-align:start;min-height:38px;padding:0 15px;border-radius:999px;border:1px solid rgba(43,36,32,.16);background:rgba(255,255,255,.5);
+    font-size:14px;color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+  .chip:hover{border-color:rgba(43,36,32,.32)}
+  .chip[aria-pressed="true"]{background:var(--plum);border-color:var(--plum);color:var(--linen)}
+  .twrap{position:relative}
+  textarea{display:block;width:100%;min-height:136px;resize:vertical;border:none;outline:none;
+    background:repeating-linear-gradient(180deg,transparent 0 33px,rgba(43,36,32,.09) 33px 34px);
+    font-family:var(--serif);font-size:18.5px;line-height:34px;color:var(--ink);padding:0 46px 0 0;border-radius:0;-webkit-appearance:none;appearance:none}
+  textarea::placeholder{color:var(--ink-3);font-style:italic}
+  .mic{position:absolute;right:0;bottom:6px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(43,36,32,.16);background:rgba(255,255,255,.6);color:var(--plum);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .mic.listening{background:var(--plum);color:var(--linen);animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(58,44,74,.4)}50%{box-shadow:0 0 0 8px rgba(58,44,74,0)}}
+  .partial{font-family:var(--serif);font-style:italic;color:var(--ink-3);font-size:16px}
+  .already{margin-top:12px;padding:12px 14px;border-radius:10px;background:rgba(58,44,74,.07);border-left:3px solid var(--gold-deep);font-size:14.5px;line-height:1.5;color:var(--ink)}
+  .already b{font-weight:600}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .keep{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink-2);cursor:pointer;user-select:none;min-height:44px}
+  .keep input{accent-color:var(--plum);width:18px;height:18px}
+  .lay{min-height:50px;padding:0 24px;border-radius:999px;border:none;cursor:pointer;font-size:16px;font-weight:600;letter-spacing:.005em;color:#2a1d08;
+    background:linear-gradient(180deg,#F7DC9C 0%,#EBBE62 55%,#D9A441 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 6px 18px rgba(217,164,65,.38),0 1px 2px rgba(80,50,10,.3);
+    transition:transform .15s ease,opacity .2s,box-shadow .2s}
+  .lay:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 24px rgba(217,164,65,.5),0 1px 2px rgba(80,50,10,.3)}
+  .lay:active{transform:scale(.985)}
+  .lay:disabled{opacity:.5;box-shadow:inset 0 1px 0 rgba(255,255,255,.4);cursor:default}
+  .tip{margin-top:12px;font-size:13px;color:var(--ink-3);line-height:1.5}
+
+  /* Below the sheet */
+  .count{margin-top:26px;font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.55;color:var(--moon);text-align:center;max-width:34ch}
+  .count:empty{margin-top:10px}
+  .lookback{margin-top:4px;text-align:center}
+  .linkbtn{background:none;border:none;color:var(--gold);font-size:15px;font-weight:500;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(240,201,121,.45);text-underline-offset:4px;padding:10px}
+  .ornament{display:block;margin:30px auto 0;opacity:.55}
+  details.prayer{margin-top:10px;max-width:32ch;text-align:center}
+  details.prayer summary{cursor:pointer;list-style:none;font-family:var(--serif);font-style:italic;font-size:17px;color:var(--gold);padding:10px}
+  details.prayer summary::-webkit-details-marker{display:none}
+  details.prayer p{margin-top:4px;font-family:var(--serif);font-size:17px;line-height:1.7;color:var(--moon)}
+  .fine{margin-top:22px;font-size:13px;color:rgba(245,238,225,.5);text-align:center;max-width:44ch;line-height:1.6}
+  .copyright{font-size:11px;margin-top:12px;color:rgba(245,238,225,.38)}
+
+  .note{position:fixed;z-index:7;pointer-events:none;background:var(--linen);background-image:var(--paper-grain);color:var(--ink);border-radius:6px;
+    padding:14px 16px;font-family:var(--serif);font-size:17px;line-height:1.45;box-shadow:0 12px 30px rgba(0,0,0,.4);overflow:hidden;white-space:pre-wrap;word-break:break-word}
+  .note.thanks{box-shadow:0 0 34px rgba(240,201,121,.65)}
+
+  /* Journal sheet */
+  .jback{position:fixed;inset:0;background:rgba(8,10,22,.6);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:20;opacity:0;transition:opacity .4s}
+  .jback.open{opacity:1}
+  .journal{position:fixed;z-index:21;left:50%;bottom:0;transform:translate(-50%,100%);width:min(620px,100vw);
+    height:calc(100dvh - var(--sat) - 28px);max-height:calc(100vh - 28px);display:flex;flex-direction:column;
+    background:var(--linen);background-image:var(--paper-grain);color:var(--ink);border-radius:20px 20px 0 0;
+    box-shadow:0 -24px 60px rgba(0,0,0,.45);transition:transform .45s var(--ease)}
+  @supports (height:100dvh){.journal{max-height:none}}
+  .journal.open{transform:translate(-50%,0)}
+  .grab{width:40px;height:5px;border-radius:3px;background:rgba(43,36,32,.18);margin:9px auto 0}
+  .jhead{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 22px 4px}
+  .jhead h2{font-family:var(--display);font-weight:400;font-size:32px;line-height:1.1}
+  .jsub{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink-2);margin-top:4px}
+  .jclose{background:none;border:none;font-size:30px;line-height:1;color:var(--ink-2);cursor:pointer;width:44px;height:44px;margin:-6px -10px 0 0;border-radius:50%}
+  .jtabs{display:flex;gap:22px;padding:10px 22px 0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid rgba(43,36,32,.12)}
+  .jtabs::-webkit-scrollbar{display:none}
+  .jtab{flex:none;min-height:42px;padding:0 0 2px;border:none;border-bottom:2px solid transparent;background:none;font-size:14.5px;font-weight:500;cursor:pointer;color:var(--ink-2);margin-bottom:-1px}
+  .jtab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold-deep)}
+  .jscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:4px 22px 24px}
+  .jlist{list-style:none}
+  .jitem{padding:16px 0 12px 14px;border-bottom:1px solid rgba(43,36,32,.1);position:relative}
+  .jitem::before{content:'';position:absolute;left:0;top:19px;width:3px;height:calc(100% - 34px);min-height:18px;border-radius:2px;background:var(--gold-deep)}
+  .jitem.k-thanks::before{background:#E7C58A}
+  .jitem.k-prayer::before{background:#8FA8D6}
+  .jitem.flash{animation:flash 2s ease}
+  @keyframes flash{0%,40%{background:rgba(240,201,121,.25)}100%{background:transparent}}
+  .jmeta{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+  .jmeta .ref{font-family:var(--serif);font-style:italic}
+  .badge{font-size:12px;padding:2px 9px;border-radius:999px;font-weight:500}
+  .badge.ans{background:var(--plum);color:var(--linen)}
+  .badge.thx{background:#F0DDB4;color:#5A3F10}
+  .badge.pray{background:#DCE5F5;color:#2E4166}
+  .jtext{position:relative;margin-top:8px;font-family:var(--serif);font-size:18px;line-height:1.55;white-space:pre-wrap;word-break:break-word;cursor:pointer;border-radius:6px;min-height:28px}
+  .jtext.folded{color:transparent;text-shadow:0 0 16px rgba(43,36,32,.5);user-select:none;-webkit-user-select:none}
+  .jtext.folded::after{content:'Tap to read';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--plum);text-shadow:none}
+  .jactions{display:flex;gap:4px 18px;flex-wrap:wrap;margin-top:4px;font-size:13.5px}
+  .jlink{background:none;border:none;padding:10px 0;color:#7A5418;cursor:pointer;font-size:13.5px;font-weight:500;text-decoration:underline;text-decoration-color:rgba(122,84,24,.35);text-underline-offset:3px}
+  .jlink.danger{color:#943A2E;text-decoration-color:rgba(148,58,46,.35)}
+  .ansform{margin-top:10px}
+  .ansform textarea,.sharebox textarea,.kform input[type=text]{min-height:84px;background:rgba(255,255,255,.6);border:1px solid rgba(43,36,32,.16);border-radius:10px;padding:10px 12px;font-family:var(--serif);font-size:17px;line-height:1.5;resize:vertical}
+  .ansform .rowb{display:flex;gap:14px;align-items:center;margin-top:10px}
+  .jbtn{min-height:42px;font-size:14.5px;font-weight:600;padding:0 18px;border-radius:999px;border:none;cursor:pointer;color:#2a1d08;
+    background:linear-gradient(180deg,#F7DC9C,#E2B04F);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 6px rgba(217,164,65,.3)}
+  .jbtn.quiet{background:rgba(43,36,32,.08);box-shadow:none;color:var(--ink)}
+  .jempty{padding:32px 6px 12px;text-align:center;font-family:var(--serif);font-style:italic;font-size:16.5px;color:var(--ink-2);line-height:1.6;max-width:36ch;margin:0 auto}
+  .eben{margin:18px 0 6px;padding:18px 18px 16px;border-radius:14px;background:linear-gradient(180deg,rgba(58,44,74,.06),rgba(58,44,74,.11));text-align:center}
+  .eben p{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.6}
+  .eben cite{display:block;font-style:normal;font-size:12.5px;color:var(--ink-2);margin-top:6px}
+  .eben .jbtn{margin-top:14px}
+  .stone{display:flex;gap:14px;padding:16px;margin:12px 0;border-radius:16px;background:linear-gradient(165deg,#F1E8D8,#E4D8C2);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 1px 0 rgba(43,36,32,.06)}
+  .stone svg{flex:none;margin-top:3px}
+  .stone .when{font-size:13px;color:var(--ink-2)}
+  .stone .how{margin-top:6px;font-family:var(--serif);font-size:18.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+  .stone .how.none{font-style:italic;color:var(--ink-2);font-size:16.5px}
+  .stone .orig{margin-top:12px;font-size:12.5px;color:var(--ink-2)}
+  .pgroup{margin-top:20px}
+  .pgroup h3{font-family:var(--display);font-size:24px;font-weight:400;display:flex;align-items:baseline;gap:10px}
+  .pgroup h3 span{font-family:var(--sans);font-size:13px;color:var(--ink-2)}
+  .jfoot{display:flex;justify-content:space-between;align-items:center;gap:6px 14px;flex-wrap:wrap;padding:8px 22px calc(var(--sab) + 10px);border-top:1px solid rgba(43,36,32,.12);font-size:12.5px;color:var(--ink-2)}
+  .jfoot .ctrls{display:flex;gap:16px}
+  .jlock{flex:1;padding:44px 24px;text-align:center}
+  .jlock p{font-family:var(--serif);font-size:19px;margin-bottom:16px}
+  .pinin{font-size:22px;letter-spacing:.4em;text-align:center;width:170px;min-height:48px;padding:6px 10px;border:1px solid rgba(43,36,32,.2);border-radius:12px;background:rgba(255,255,255,.65);color:var(--ink)}
+  .jerr{margin-top:10px;font-size:13.5px;color:#943A2E;min-height:18px}
+  .pinform{padding:16px 0 4px;border-top:1px solid rgba(43,36,32,.1);margin-top:14px;font-size:14px}
+  .pinform p{margin-bottom:12px;color:var(--ink-2);line-height:1.55}
+  .pinform form,.jlock form{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+
+  /* Bottom sheets: testimony + keepsake */
+  .share{position:fixed;inset:0;z-index:30;background:rgba(8,10,22,.7);display:flex;align-items:flex-end;justify-content:center}
+  .sharebox{width:min(560px,100vw);max-height:calc(100dvh - var(--sat) - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    background:var(--linen);background-image:var(--paper-grain);color:var(--ink);border-radius:20px 20px 0 0;padding:18px 22px calc(var(--sab) + 20px)}
+  .sharebox h3{font-family:var(--display);font-weight:400;font-size:28px;line-height:1.15}
+  .sharebox .hint{font-size:13.5px;color:var(--ink-2);margin-top:6px;line-height:1.55}
+  .sharebox textarea{margin-top:12px;width:100%}
+  .sharebox img{display:block;width:100%;max-width:340px;margin:16px auto 0;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.25);-webkit-touch-callout:default}
+  .sharebox .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+  .sharebox .msg{text-align:center;font-size:13.5px;color:#5A3F10;min-height:18px;margin-top:10px}
+  .kform{display:grid;gap:12px;margin-top:14px}
+  .kform label.f{display:grid;gap:6px;font-size:13.5px;color:var(--ink-2)}
+  .kform input[type=text]{min-height:46px;width:100%}
+  .kform select{min-height:46px;border:1px solid rgba(43,36,32,.16);border-radius:10px;background:rgba(255,255,255,.6);padding:0 12px;font-size:16px;color:var(--ink)}
+  .kform .chk{display:flex;gap:10px;align-items:center;font-size:14.5px;color:var(--ink);min-height:40px}
+  .kform .chk input{accent-color:var(--plum);width:18px;height:18px}
+  .kpages{display:flex;gap:12px;overflow-x:auto;padding:16px 2px 6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .kpages img{flex:none;width:72%;max-width:260px;scroll-snap-align:center;border-radius:6px;box-shadow:0 8px 20px rgba(0,0,0,.22);-webkit-touch-callout:default}
+
+  @media (max-width:420px){
+    .row .lay{flex:1 1 100%}
+    .pill .lbl{display:none}
+    .modes{padding:0 6px}
+    .modes button{font-size:13.5px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    #emberG circle,#emberPG circle,.scene svg .rays{animation:none}
+    .verse,.card,.journal{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="bg-dawn"></div><div class="grain"></div>
+<canvas id="sky"></canvas>
+<canvas id="fx"></canvas>
+
+<div class="topbar">
+  <button class="pill" id="jOpen" type="button" aria-label="Open My Journal">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z"/><path d="M12 6v13.5"/></svg>
+    <span>My Journal</span><span class="jcount" id="jCount"></span>
+  </button>
+  <button class="pill sound" id="soundBtn" type="button" aria-pressed="true" aria-label="Sound on">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path id="waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path id="mute" d="M16.5 9.5l5 5M21.5 9.5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="display:none"/></svg>
+    <span class="lbl" id="soundLabel">Sound on</span>
+  </button>
+</div>
+
+<main>
+  <header class="title">
+    <h1>Leave It at the Cross</h1>
+    <p class="sub">“Come to me, all of you who are weary and burdened, and I will give you rest.”<cite>Matthew 11:28</cite></p>
+  </header>
+
+  <div class="scene" id="scene">
+    <div class="halo" id="halo"></div>
+    <svg viewBox="0 0 520 400" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <defs>
+        <radialGradient id="rayFade" cx="260" cy="114" r="330" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#ffe6ad" stop-opacity=".34"/>
+          <stop offset=".45" stop-color="#f7c96b" stop-opacity=".1"/>
+          <stop offset="1" stop-color="#f7c96b" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="woodBase" x1="0" x2="1">
+          <stop offset="0" stop-color="#5b3b25"/><stop offset=".5" stop-color="#7a5236"/><stop offset="1" stop-color="#4a2f1d"/>
+        </linearGradient>
+        <linearGradient id="woodBaseH" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#7f5739"/><stop offset=".55" stop-color="#6a4630"/><stop offset="1" stop-color="#46301f"/>
+        </linearGradient>
+        <linearGradient id="roundV" x1="0" x2="1">
+          <stop offset="0" stop-color="#000" stop-opacity=".45"/>
+          <stop offset=".12" stop-color="#ffd9a0" stop-opacity=".22"/>
+          <stop offset=".35" stop-color="#fff" stop-opacity="0"/>
+          <stop offset=".75" stop-color="#000" stop-opacity=".12"/>
+          <stop offset="1" stop-color="#000" stop-opacity=".55"/>
+        </linearGradient>
+        <linearGradient id="roundH" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#ffd9a0" stop-opacity=".3"/>
+          <stop offset=".25" stop-color="#fff" stop-opacity="0"/>
+          <stop offset=".7" stop-color="#000" stop-opacity=".15"/>
+          <stop offset="1" stop-color="#000" stop-opacity=".55"/>
+        </linearGradient>
+        <linearGradient id="linen" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#fffaf0"/><stop offset=".5" stop-color="#f1e6d0"/><stop offset="1" stop-color="#c9b89a"/>
+        </linearGradient>
+        <linearGradient id="hill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#2a1f2c"/>
+          <stop offset=".45" stop-color="#1a131e" stop-opacity=".85"/>
+          <stop offset="1" stop-color="#120d16" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="stone" cx=".35" cy=".3" r=".8">
+          <stop offset="0" stop-color="#6d6168"/><stop offset="1" stop-color="#2b2329"/>
+        </radialGradient>
+        <filter id="grainV" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.42 0.012" numOctaves="3" seed="7" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 .13  0 0 0 0 .07  0 0 0 0 .03  2.4 0 0 0 -1.05" result="streaks"/>
+          <feComposite in="streaks" in2="SourceGraphic" operator="in" result="g"/>
+          <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="g"/></feMerge>
+        </filter>
+        <filter id="grainH" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.42" numOctaves="3" seed="3" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 .13  0 0 0 0 .07  0 0 0 0 .03  2.4 0 0 0 -1.05" result="streaks"/>
+          <feComposite in="streaks" in2="SourceGraphic" operator="in" result="g"/>
+          <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="g"/></feMerge>
+        </filter>
+        <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+        <filter id="blur1"><feGaussianBlur stdDeviation="1"/></filter>
+        <clipPath id="vClip"><rect x="244" y="28" width="32" height="296" rx="1.5"/></clipPath>
+        <radialGradient id="emberGrad2">
+          <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#cfe0ff"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="emberGrad">
+          <stop offset="0" stop-color="#fff6dc"/><stop offset=".45" stop-color="#f7c96b"/><stop offset="1" stop-color="#f7c96b" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="farFade" gradientUnits="userSpaceOnUse" x1="-40" y1="0" x2="560" y2="0">
+          <stop offset="0" stop-color="#2b2342" stop-opacity="0"/><stop offset=".22" stop-color="#2b2342" stop-opacity=".9"/>
+          <stop offset=".78" stop-color="#2b2342" stop-opacity=".9"/><stop offset="1" stop-color="#2b2342" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="midFade" gradientUnits="userSpaceOnUse" x1="-40" y1="0" x2="560" y2="0">
+          <stop offset="0" stop-color="#211a2e" stop-opacity="0"/><stop offset=".18" stop-color="#211a2e" stop-opacity=".95"/>
+          <stop offset=".82" stop-color="#211a2e" stop-opacity=".95"/><stop offset="1" stop-color="#211a2e" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="mist" cx="260" cy="318" r="300" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 .12 0 279.8)">
+          <stop offset="0" stop-color="#f5d9b8" stop-opacity=".22"/><stop offset="1" stop-color="#f5d9b8" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="vgrad" gradientUnits="userSpaceOnUse" x1="0" y1="300" x2="0" y2="420">
+          <stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <mask id="vfade" maskUnits="userSpaceOnUse" x="-100" y="200" width="760" height="260"><rect x="-100" y="200" width="760" height="260" fill="url(#vgrad)"/></mask>
+      </defs>
+
+      <g class="rays" fill="url(#rayFade)"><polygon points="260,114 599.7,100.9 599.7,127.1"/><polygon points="260,114 591.6,189.3 584.8,214.5"/><polygon points="260,114 560.8,272.6 547.7,295.2"/><polygon points="260,114 509.5,345.0 491.0,363.5"/><polygon points="260,114 441.2,401.7 418.6,414.8"/><polygon points="260,114 360.5,438.8 335.3,445.6"/><polygon points="260,114 273.1,453.7 246.9,453.7"/><polygon points="260,114 184.7,445.6 159.5,438.8"/><polygon points="260,114 101.4,414.8 78.8,401.7"/><polygon points="260,114 29.0,363.5 10.5,345.0"/><polygon points="260,114 -27.7,295.2 -40.8,272.6"/><polygon points="260,114 -64.8,214.5 -71.6,189.3"/><polygon points="260,114 -79.7,127.1 -79.7,100.9"/><polygon points="260,114 -71.6,38.7 -64.8,13.5"/><polygon points="260,114 -40.8,-44.6 -27.7,-67.2"/><polygon points="260,114 10.5,-117.0 29.0,-135.5"/><polygon points="260,114 78.8,-173.7 101.4,-186.8"/><polygon points="260,114 159.5,-210.8 184.7,-217.6"/><polygon points="260,114 246.9,-225.7 273.1,-225.7"/><polygon points="260,114 335.3,-217.6 360.5,-210.8"/><polygon points="260,114 418.6,-186.8 441.2,-173.7"/><polygon points="260,114 491.0,-135.5 509.5,-117.0"/><polygon points="260,114 547.7,-67.2 560.8,-44.6"/><polygon points="260,114 584.8,13.5 591.6,38.7"/></g>
+
+      <g mask="url(#vfade)">
+      <!-- distant hills -->
+      <path d="M-40 430 L-40 292 C 20 282, 80 286, 130 294 C 180 302, 220 290, 280 286 C 350 281, 430 296, 500 290 C 530 288, 550 290, 560 292 L560 430 Z" fill="url(#farFade)"/>
+      <path d="M-40 430 L-40 306 C 30 300, 90 312, 150 316 C 210 320, 240 312, 300 314 C 380 317, 460 306, 560 312 L560 430 Z" fill="url(#midFade)"/>
+      <ellipse cx="260" cy="318" rx="300" ry="36" fill="url(#mist)"/>
+      </g>
+      <!-- shadow of the cross on the sky glow -->
+      <g opacity=".35" filter="url(#blur3)" transform="translate(5 6)">
+        <rect x="244" y="28" width="32" height="296"/><rect x="166" y="100" width="188" height="28"/>
+      </g>
+
+      <!-- upright -->
+      <rect x="244" y="28" width="32" height="296" rx="1.5" fill="url(#woodBase)" filter="url(#grainV)"/>
+      <rect x="244" y="28" width="32" height="296" rx="1.5" fill="url(#roundV)"/>
+      <rect x="244" y="28" width="32" height="5" fill="#2e1d11" opacity=".55"/>
+      <!-- knot -->
+      <ellipse cx="262" cy="236" rx="4" ry="7" fill="#3a2414" opacity=".7"/>
+      <ellipse cx="262" cy="236" rx="2" ry="4" fill="#24160c" opacity=".8"/>
+      <!-- crossbeam's shadow on the upright -->
+      <rect x="244" y="126" width="32" height="14" fill="#000" opacity=".45" filter="url(#blur3)" clip-path="url(#vClip)"/>
+
+      <!-- crossbeam -->
+      <rect x="166" y="100" width="188" height="28" rx="1.5" fill="url(#woodBaseH)" filter="url(#grainH)"/>
+      <rect x="166" y="100" width="188" height="28" rx="1.5" fill="url(#roundH)"/>
+      <rect x="166" y="100" width="5" height="28" fill="#2e1d11" opacity=".6"/>
+      <rect x="349" y="100" width="5" height="28" fill="#2e1d11" opacity=".6"/>
+      <ellipse cx="196" cy="113" rx="6" ry="2.6" fill="#3a2414" opacity=".6"/>
+      <!-- golden rim light from the glow behind -->
+      <rect x="244" y="28" width="1.6" height="72" fill="#ffd27a" opacity=".55" filter="url(#blur1)"/>
+      <rect x="166" y="100" width="78" height="1.4" fill="#ffd27a" opacity=".5" filter="url(#blur1)"/>
+      <rect x="276" y="100" width="78" height="1.4" fill="#ffd27a" opacity=".5" filter="url(#blur1)"/>
+
+      <!-- draped linen: He is risen -->
+      <g>
+        <path d="M216,99 C236,93 284,93 306,99 C310,112 312,124 314,132 C320,160 324,196 318,236 L307,227 L297,239 C298,200 292,168 282,142 C268,158 252,158 238,142 C228,170 222,204 225,247 L213,236 L202,245 C196,200 200,160 208,132 C210,120 212,108 216,99 Z"
+              fill="#000" opacity=".35" filter="url(#blur3)" transform="translate(4 5)"/>
+        <path d="M216,99 C236,93 284,93 306,99 C310,112 312,124 314,132 C320,160 324,196 318,236 L307,227 L297,239 C298,200 292,168 282,142 C268,158 252,158 238,142 C228,170 222,204 225,247 L213,236 L202,245 C196,200 200,160 208,132 C210,120 212,108 216,99 Z"
+              fill="url(#linen)"/>
+        <g fill="none" stroke="#a8947a" stroke-linecap="round" opacity=".55">
+          <path d="M219,112 C214,150 210,190 208,232" stroke-width="1.4"/>
+          <path d="M228,124 C224,160 222,195 222,236" stroke-width="1"/>
+          <path d="M303,112 C308,150 313,190 314,226" stroke-width="1.4"/>
+          <path d="M294,126 C298,160 299,195 300,232" stroke-width="1"/>
+          <path d="M242,132 C252,146 268,146 280,132" stroke-width="1.2"/>
+          <path d="M236,118 C250,128 270,128 286,118" stroke-width=".9"/>
+        </g>
+        <path d="M216,99 C236,93 284,93 306,99" stroke="#fff" stroke-width="1.5" fill="none" opacity=".8"/>
+      </g>
+
+      <!-- hill -->
+      <path d="M-60 440 C 40 352, 170 312, 260 310 C 350 312, 480 352, 580 440 Z" fill="url(#hill)"/>
+      <!-- stones at the foot -->
+      <ellipse cx="236" cy="322" rx="13" ry="7" fill="url(#stone)"/>
+      <ellipse cx="287" cy="323" rx="15" ry="7.5" fill="url(#stone)"/>
+      <ellipse cx="258" cy="328" rx="10" ry="5" fill="url(#stone)"/>
+      <ellipse cx="305" cy="330" rx="7" ry="4" fill="url(#stone)"/>
+      <ellipse cx="219" cy="330" rx="6" ry="3.5" fill="url(#stone)"/>
+      <path d="M150 336 l3 -9 l2 9 M160 333 l2 -7 l3 7 M352 334 l2 -8 l3 8 M366 338 l3 -7 l2 7" stroke="#2f2433" stroke-width="2" fill="none"/>
+    
+      <g id="emberHit" role="button" tabindex="0" aria-label="Open My Journal">
+        <ellipse cx="260" cy="324" rx="95" ry="26" fill="rgba(0,0,0,0)"/>
+        <g id="emberG"></g><g id="emberPG"></g>
+      </g>
+      <circle id="footPt" cx="260" cy="318" r=".5" fill="none"/>
+    </svg>
+  </div>
+
+  <section class="verse" id="verse" aria-live="polite">
+    <div class="after" id="afterLine"></div>
+    <blockquote id="verseText"></blockquote>
+    <cite id="verseRef"></cite>
+  </section>
+
+  <div class="sheet">
+  <div class="modes" role="group" aria-label="What would you like to do?">
+    <button type="button" id="modeLay" aria-pressed="true">Lay it down</button>
+    <button type="button" id="modeThanks" aria-pressed="false">Give thanks</button>
+    <button type="button" id="modePray" aria-pressed="false">Pray for others</button>
+  </div>
+
+  <form class="card" id="card" autocomplete="off">
+    <div class="who" id="who" hidden>
+      <label class="q" for="person">Who are you praying for?</label>
+      <input id="person" type="text" maxlength="60" autocomplete="off" autocapitalize="words" placeholder="A name">
+      <div class="people" id="people"></div>
+    </div>
+    <label class="q" for="burden" id="qLabel">What are you carrying today?</label>
+    <div class="chips" id="chips" role="group" aria-label="What kind of burden is it?"></div>
+    <div class="twrap">
+      <textarea id="burden" placeholder="A worry, a fear, a hurt, a regret… write it here and give it to Him." maxlength="1000" enterkeyhint="enter"></textarea>
+      <button type="button" class="mic" id="mic" hidden aria-label="Speak instead of typing">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+      </button>
+    </div>
+    <div class="partial" id="partial"></div>
+    <div class="already" id="already" hidden></div>
+    <div class="row">
+      <label class="keep"><input type="checkbox" id="keepIt" checked> Keep in My Journal</label>
+      <button type="submit" class="lay" id="layBtn" disabled>Leave it at the cross</button>
+    </div>
+    <p class="tip" id="tip"></p>
+  </form>
+  </div>
+
+  <div class="count" id="count"></div>
+  <div class="lookback" id="lookback" hidden><button type="button" class="linkbtn" id="jOpen2">Look back at what you’ve given Him</button></div>
+
+  <svg class="ornament" width="120" height="14" viewBox="0 0 120 14" aria-hidden="true"><path d="M0 7h50M70 7h50" stroke="#F0C979" stroke-width=".8"/><path d="M60 1v12M55.5 5h9" stroke="#F0C979" stroke-width="1.1" stroke-linecap="round"/></svg>
+  <details class="prayer">
+    <summary>A prayer for letting go</summary>
+    <p>Lord Jesus, I have been holding this too tightly and for too long. I lay it down at Your feet. Take what I cannot carry, and give me Your rest in its place. I trust You with it, and I do not need to pick it back up. Amen.</p>
+  </details>
+
+  <p class="fine">With “Keep in My Journal” on, what you write is saved to My Journal, which only you can open. Turn it off and it is simply gone.</p>
+  <p class="fine copyright">Scripture quotations are from the Christian Standard Bible®, Copyright © 2017 by Holman Bible Publishers. Used by permission. Christian Standard Bible® and CSB® are federally registered trademarks of Holman Bible Publishers.</p>
+</main>
+
+<div class="jback" id="jBack" hidden></div>
+<aside class="journal" id="journal" hidden role="dialog" aria-modal="true" aria-labelledby="jTitle">
+  <div class="grab" aria-hidden="true"></div>
+  <div class="jhead">
+    <div><h2 id="jTitle">My Journal</h2><p class="jsub" id="jSub"></p></div>
+    <button class="jclose" id="jClose" type="button" aria-label="Close">×</button>
+  </div>
+  <div class="jlock" id="jLock" hidden>
+    <p>Enter your passcode</p>
+    <form id="pinGoForm"><input class="pinin" id="pinIn" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8"><button class="jbtn" type="submit">Open</button></form>
+    <div class="jerr" id="pinErr"></div>
+  </div>
+  <div class="jtabs" id="jTabs" role="tablist">
+    <button class="jtab" role="tab" data-tab="all" aria-selected="true">All</button>
+    <button class="jtab" role="tab" data-tab="burden" aria-selected="false">Laid down</button>
+    <button class="jtab" role="tab" data-tab="thanks" aria-selected="false">Thanks</button>
+    <button class="jtab" role="tab" data-tab="people" aria-selected="false">People</button>
+    <button class="jtab" role="tab" data-tab="stones" aria-selected="false">Stones of remembrance</button>
+  </div>
+  <div class="jscroll" id="jBody">
+    <div id="jTop"></div>
+    <ul class="jlist" id="jList"></ul>
+    <p class="jempty" id="jEmpty" hidden></p>
+    <div class="pinform" id="pinForm" hidden>
+      <p>Choose a 4–8 digit passcode. It keeps My Journal from opening for anyone who picks up your phone. It’s a privacy screen, not encryption.</p>
+      <form id="pinSetForm"><input class="pinin" id="pinNew" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" placeholder="••••"><button class="jbtn" type="submit">Save</button></form>
+      <div class="jerr" id="pinSetErr"></div>
+    </div>
+  </div>
+  <div class="jfoot">
+    <span id="jWhere"></span>
+    <span class="ctrls" id="pinCtrls"><button class="jlink" id="pinToggle" type="button">Set a passcode</button><button class="jlink" id="pinRemove" type="button" hidden>Remove passcode</button></span>
+  </div>
+</aside>
+
+<div class="share" id="share" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="sharebox">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><h3 id="shareTitle">Share what God did</h3><p class="hint">Only what you write here goes on the card. The private prayer behind it stays in My Journal.</p></div>
+      <button class="jclose" id="shareClose" type="button" aria-label="Close">×</button>
+    </div>
+    <textarea id="shareText" maxlength="400" placeholder="What did He do?"></textarea>
+    <img id="shareImg" alt="Testimony card preview">
+    <div class="btns">
+      <button class="jbtn" id="shareSave" type="button" hidden>Save image</button>
+      <button class="jbtn" id="shareCopy" type="button" style="background:#e9dfc9">Copy text</button>
+    </div>
+    <p class="msg" id="shareMsg"></p>
+    <p class="hint" id="shareHold" style="text-align:center"></p>
+  </div>
+</div>
+
+<div class="share" id="keep" hidden role="dialog" aria-modal="true" aria-labelledby="keepTitle">
+  <div class="sharebox">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <h3 id="keepTitle">Your year’s keepsake</h3>
+      <button class="jclose" id="keepClose" type="button" aria-label="Close">×</button>
+    </div>
+    <p class="hint">A small book of what God did: your answered prayers and your thanksgivings. The burdens you laid down stay private. Only how many there were is counted.</p>
+    <form class="kform" id="kform" onsubmit="return false">
+      <label class="f">Year<select id="kYear"></select></label>
+      <label class="f">Your name for the cover (optional)<input type="text" id="kName" maxlength="40" autocomplete="off" placeholder="Kept by…"></label>
+      <label class="chk"><input type="checkbox" id="kNames"> Include names of people I prayed for</label>
+      <label class="chk"><input type="checkbox" id="kPrayed"> Include what I prayed, next to each answer</label>
+    </form>
+    <div class="kpages" id="kPages" aria-label="Keepsake pages"></div>
+    <div class="btns"><button class="jbtn" id="kSave" type="button">Save as PDF</button></div>
+    <p class="msg" id="kMsg"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const isiOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const $ = id => document.getElementById(id);
+  const P = 'leave-it-at-the-cross:';
+  const ls = {
+    get(k, d = null){ try { const v = localStorage.getItem(P + k); return v === null ? d : v; } catch(e){ return d; } },
+    set(k, v){ try { v === null ? localStorage.removeItem(P + k) : localStorage.setItem(P + k, v); } catch(e){} }
+  };
+
+  // ---------- Scripture (CSB) ----------
+  const V = {
+    'Matthew 11:28': 'Come to me, all of you who are weary and burdened, and I will give you rest.',
+    'Matthew 11:30': 'For my yoke is easy and my burden is light.',
+    '1 Peter 5:7': 'Casting all your cares on him, because he cares about you.',
+    'Psalm 55:22': 'Cast your burden on the LORD, and he will sustain you; he will never allow the righteous to be shaken.',
+    'John 14:27': 'Peace I leave with you. My peace I give to you. I do not give to you as the world gives. Don’t let your heart be troubled or fearful.',
+    'Psalm 34:18': 'The LORD is near the brokenhearted; he saves those crushed in spirit.',
+    'Isaiah 41:10': 'Do not fear, for I am with you; do not be afraid, for I am your God. I will strengthen you; I will help you; I will hold on to you with my righteous right hand.',
+    'Philippians 4:7': 'And the peace of God, which surpasses all understanding, will guard your hearts and minds in Christ Jesus.',
+    'Lamentations 3:22–23': 'Because of the LORD’s faithful love we do not perish, for his mercies never end. They are new every morning; great is your faithfulness!',
+    '2 Corinthians 5:17': 'Therefore, if anyone is in Christ, he is a new creation; the old has passed away, and see, the new has come!',
+    'Psalm 46:1': 'God is our refuge and strength, a helper who is always found in times of trouble.',
+    'Psalm 103:12': 'As far as the east is from the west, so far has he removed our transgressions from us.',
+    'Psalm 147:3': 'He heals the brokenhearted and bandages their wounds.',
+    'Matthew 6:34': 'Therefore don’t worry about tomorrow, because tomorrow will worry about itself. Each day has enough trouble of its own.',
+    'Psalm 56:3': 'When I am afraid, I will trust in you.',
+    'Revelation 21:4': 'He will wipe away every tear from their eyes. Death will be no more; grief, crying, and pain will be no more, because the previous things have passed away.',
+    'Matthew 5:4': 'Blessed are those who mourn, because they will be comforted.',
+    'Romans 8:1': 'Therefore, there is now no condemnation for those in Christ Jesus.',
+    '1 John 1:9': 'If we confess our sins, he is faithful and righteous to forgive us our sins and to cleanse us from all unrighteousness.',
+    'Ephesians 4:32': 'And be kind and compassionate to one another, forgiving one another, just as God also forgave you in Christ.',
+    'Isaiah 40:31': 'But those who trust in the LORD will renew their strength; they will soar on wings like eagles; they will run and not become weary, they will walk and not faint.',
+    'Philippians 4:19': 'And my God will supply all your needs according to his riches in glory in Christ Jesus.',
+    'Matthew 6:33': 'But seek first the kingdom of God and his righteousness, and all these things will be provided for you.',
+    'Psalm 107:1': 'Give thanks to the LORD, for he is good; his faithful love endures forever.',
+    '1 Thessalonians 5:18': 'Give thanks in everything; for this is God’s will for you in Christ Jesus.',
+    'James 1:17': 'Every good and perfect gift is from above, coming down from the Father of lights, who does not change like shifting shadows.',
+    'Psalm 118:24': 'This is the day the LORD has made; let’s rejoice and be glad in it.',
+    'Galatians 6:2': 'Carry one another’s burdens; in this way you will fulfill the law of Christ.',
+    'James 5:16': 'Therefore, confess your sins to one another and pray for one another, so that you may be healed. The prayer of a righteous person is very powerful in its effect.',
+    'Philippians 4:6': 'Don’t worry about anything, but in everything, through prayer and petition with thanksgiving, present your requests to God.',
+    'Numbers 6:24–26': 'May the LORD bless you and protect you; may the LORD make his face shine on you and be gracious to you; may the LORD look with favor on you and give you peace.'
+  };
+  const PRAY_REFS = ['Galatians 6:2','James 5:16','Philippians 4:6','Numbers 6:24–26','1 Peter 5:7'];
+  const CATS = [
+    { id:'worry', label:'Worry', refs:['Matthew 6:34','1 Peter 5:7','Philippians 4:7','Psalm 55:22','Matthew 11:28'] },
+    { id:'fear', label:'Fear', refs:['Isaiah 41:10','Psalm 56:3','John 14:27','Psalm 46:1'] },
+    { id:'grief', label:'Grief', refs:['Psalm 34:18','Psalm 147:3','Revelation 21:4','Matthew 5:4'] },
+    { id:'guilt', label:'Guilt', refs:['Psalm 103:12','Romans 8:1','1 John 1:9','2 Corinthians 5:17'] },
+    { id:'hurt', label:'A hurt', refs:['Psalm 147:3','Ephesians 4:32','Psalm 34:18','John 14:27'] },
+    { id:'weary', label:'Weariness', refs:['Matthew 11:28','Matthew 11:30','Isaiah 40:31','Lamentations 3:22–23'] },
+    { id:'needs', label:'Money & needs', refs:['Philippians 4:19','Matthew 6:33','Matthew 6:34','Psalm 55:22'] },
+  ];
+  const BURDEN_REFS = [...new Set(CATS.flatMap(c => c.refs))];
+  const THANKS_REFS = ['Psalm 107:1','1 Thessalonians 5:18','James 1:17','Psalm 118:24','Lamentations 3:22–23'];
+  const AFTER_LAY = ['It is His now.', 'You don’t have to carry this anymore.', 'Laid down. Left behind.', 'He has it.', 'Rest now.'];
+  const AFTER_THX = ['Thank You, Lord.', 'Every good gift is from Him.', 'A new light in the sky.', 'Counted and remembered.'];
+  const catLabel = id => (CATS.find(c => c.id === id) || {}).label || '';
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  let lastRef = null, lastPerson = null;
+  function pickRef(list){ let r; let n = 0; do { r = pick(list); } while (r === lastRef && list.length > 1 && ++n < 10); lastRef = r; return r; }
+
+  // ---------- Elements & state ----------
+  const ta = $('burden'), btn = $('layBtn'), card = $('card');
+  let mode = 'lay', cat = null, busy = false;
+  let entries = [];
+  let cloud = null, pinHash = ls.get('pin'), unlocked = false, jTab = 'all';
+  if (ls.get('keep') === 'off') $('keepIt').checked = false;
+  $('keepIt').addEventListener('change', () => ls.set('keep', $('keepIt').checked ? 'on' : 'off'));
+
+  const burdenCount = () => Math.max(parseInt(ls.get('count', '0'), 10) || 0, entries.filter(e => e.kind === 'burden').length);
+  const prayCount = () => Math.max(parseInt(ls.get('pray-count', '0'), 10) || 0, entries.filter(e => e.kind === 'prayer').length);
+  const thanksCount = () => Math.max(parseInt(ls.get('thanks-count', '0'), 10) || 0, entries.filter(e => e.kind === 'thanks').length);
+  const bump = k => ls.set(k, String((parseInt(ls.get(k, '0'), 10) || 0) + 1));
+
+  // ---------- Chips ----------
+  const chipsEl = $('chips');
+  CATS.forEach(c => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.textContent = c.label; b.dataset.cat = c.id; b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => { cat = cat === c.id ? null : c.id; renderChips(); });
+    chipsEl.append(b);
+  });
+  function renderChips(){ chipsEl.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === cat ? 'true' : 'false')); }
+
+  // ---------- Mode ----------
+  const MODE_TEXT = {
+    lay: ['What are you carrying today?', 'A worry, a fear, a hurt, a regret… write it here and give it to Him.', 'Leave it at the cross'],
+    thanks: ['What are you thankful for?', 'A blessing, an answered prayer, a small good thing today…', 'Offer it with thanks'],
+    pray: ['What are you bringing to Him for them?', 'Their healing, their work, their heart, their walk with God…', 'Carry it to the cross']
+  };
+  function renderPeople(){
+    const box = $('people'); box.textContent = '';
+    const seen = new Set();
+    for (const e of entries) {
+      if (e.kind !== 'prayer' || !e.person) continue;
+      const k = e.person.toLowerCase(); if (seen.has(k)) continue; seen.add(k);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = e.person;
+      b.setAttribute('aria-pressed', $('person').value.trim().toLowerCase() === k ? 'true' : 'false');
+      b.onclick = () => { $('person').value = e.person; renderPeople(); ta.focus({ preventScroll: true }); };
+      box.append(b); if (seen.size >= 10) break;
+    }
+    box.hidden = seen.size === 0;
+  }
+  $('person').addEventListener('input', renderPeople);
+  function setMode(m){
+    mode = m;
+    $('modeLay').setAttribute('aria-pressed', m === 'lay'); $('modeThanks').setAttribute('aria-pressed', m === 'thanks'); $('modePray').setAttribute('aria-pressed', m === 'pray');
+    chipsEl.hidden = m !== 'lay';
+    $('who').hidden = m !== 'pray'; if (m === 'pray') renderPeople();
+    $('qLabel').textContent = MODE_TEXT[m][0]; ta.placeholder = MODE_TEXT[m][1]; btn.textContent = MODE_TEXT[m][2];
+    $('already').hidden = true;
+    if (m === 'lay') checkAlready();
+  }
+  $('modeLay').addEventListener('click', () => setMode('lay'));
+  $('modeThanks').addEventListener('click', () => setMode('thanks'));
+  $('modePray').addEventListener('click', () => setMode('pray'));
+
+  // Enter submits on keyboards; on phones Enter is a new line and the button lays it down.
+  $('tip').textContent = coarse
+    ? (isiOS ? 'Tip: to speak instead of type, tap the microphone on your iPhone keyboard.' : 'Tip: you can use the microphone on your keyboard to speak.')
+    : 'Press Enter to lay it down · Shift + Enter for a new line.';
+  ta.addEventListener('keydown', e => {
+    if (!coarse && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (ta.value.trim()) card.requestSubmit(); }
+  });
+
+  // ---------- "You already gave this" ----------
+  const STOP = new Set('about after again also always because been before being cannot could does doing dont even every from have having into just like more most much need really should some still than that their them then there these they thing things this those through very want what when where which while will with without would your yours myself feel feeling going know make made over under'.split(' '));
+  const words = t => new Set((t.toLowerCase().match(/[a-z’']{4,}/g) || []).map(w => w.replace(/[’']/g, '')).filter(w => !STOP.has(w)));
+  let alreadyTimer = null;
+  function findSimilar(text){
+    const a = words(text); if (a.size < 2) return null;
+    let best = null, bestScore = 0;
+    for (const e of entries) {
+      if (e.kind !== 'burden' || e.answered) continue;
+      const b = words(e.text || ''); if (b.size < 2) continue;
+      let common = 0; a.forEach(w => { if (b.has(w)) common++; });
+      const score = common / Math.min(a.size, b.size);
+      if (common >= 2 && score >= 0.5 && score > bestScore) { best = e; bestScore = score; }
+    }
+    return best;
+  }
+  function checkAlready(){
+    const el = $('already');
+    if (mode !== 'lay') { el.hidden = true; return; }
+    const m = findSimilar(ta.value);
+    if (!m) { el.hidden = true; return; }
+    el.textContent = '';
+    const b = document.createElement('b'); b.textContent = 'You’ve laid this down before.';
+    el.append(b, ` On ${fmtDate(m.ts)} you gave something like this to Him, and He’s still holding it. You can leave it with Him again. `);
+    const see = document.createElement('button'); see.type = 'button'; see.className = 'jlink'; see.textContent = 'See it';
+    see.onclick = () => openJournal({ focusId: m.id });
+    el.append(see);
+    el.hidden = false;
+  }
+  ta.addEventListener('input', () => {
+    btn.disabled = !ta.value.trim();
+    clearTimeout(alreadyTimer); alreadyTimer = setTimeout(checkAlready, 450);
+  });
+
+  // ---------- Submit ----------
+  card.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = ta.value.trim();
+    if (!text || busy) return;
+    busy = true; btn.disabled = true;
+    $('already').hidden = true; $('partial').textContent = '';
+    $('verse').classList.remove('show');
+    if (dict && dict.active()) dict.stop().catch(() => {});
+    const kind = mode === 'thanks' ? 'thanks' : mode === 'pray' ? 'prayer' : 'burden';
+    const person = kind === 'prayer' ? ($('person').value.trim().replace(/\s+/g, ' ') || 'Someone I love') : null;
+    const refs = kind === 'thanks' ? THANKS_REFS : kind === 'prayer' ? PRAY_REFS : (cat ? CATS.find(c => c.id === cat).refs : BURDEN_REFS);
+    const ref = pickRef(refs);
+    lastPerson = person;
+    if ($('keepIt').checked) keepEntry({ text, ref, kind, cat: kind === 'burden' ? cat : null, person });
+    if (soundOn && initAudio()) wind(reduce ? 0.6 : 2.2);
+    // on phones: close the keyboard and bring the cross into view first
+    if (coarse || window.scrollY > 40) {
+      ta.blur();
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      setTimeout(() => release(text, kind, ref), 450);
+    } else release(text, kind, ref);
+  });
+
+  // ---------- Release animation ----------
+  function release(text, kind, ref){
+    const from = ta.getBoundingClientRect();
+    let target;
+    if (kind === 'thanks') { const s = starPos(thanksCount()); target = { x: s.x, y: s.y }; }
+    else { const f = $('footPt').getBoundingClientRect(); target = { x: f.left, y: f.top }; }
+    const note = document.createElement('div');
+    note.className = 'note' + (kind === 'thanks' ? ' thanks' : '');
+    note.textContent = text;
+    const w = Math.min(from.width, 420), h = Math.min(Math.max(from.height, 90), 160);
+    const x0 = from.left + (from.width - w) / 2, y0 = from.top;
+    Object.assign(note.style, { left: x0 + 'px', top: y0 + 'px', width: w + 'px', height: h + 'px' });
+    document.body.appendChild(note);
+    ta.value = ''; ta.dispatchEvent(new Event('input'));
+    card.classList.add('away');
+    const dx = target.x - (x0 + w / 2), dy = target.y - (y0 + h / 2);
+    const dur = reduce ? 600 : 2200;
+    const anim = note.animate([
+      { transform:'translate(0,0) scale(1) rotate(0deg)', opacity:1, filter:'brightness(1)' },
+      { transform:`translate(${dx*.35}px, ${dy*.35 - 30}px) scale(.82) rotate(-3deg)`, opacity:1, offset:.35 },
+      { transform:`translate(${dx*.85}px, ${dy*.9}px) scale(.3) rotate(2deg)`, opacity:1, filter:'brightness(1.4)', offset:.8 },
+      { transform:`translate(${dx}px, ${dy}px) scale(.1)`, opacity:0, filter:'brightness(3)' }
+    ], { duration: dur, easing:'cubic-bezier(.45,.05,.35,1)', fill:'forwards' });
+    anim.onfinish = () => {
+      note.remove();
+      burst(target.x, target.y, kind === 'thanks' ? 60 : 110);
+      if (kind === 'thanks') { thanksChime(); bump('thanks-count'); newStarAt = performance.now(); }
+      else { chime(); bump(kind === 'prayer' ? 'pray-count' : 'count'); $('halo').classList.add('bright'); document.body.classList.add('dawn'); }
+      renderMarks(true);
+      setTimeout(() => showVerse(ref, kind), reduce ? 200 : 900);
+      setTimeout(() => {
+        $('halo').classList.remove('bright');
+        card.classList.remove('away');
+        busy = false;
+        if (!coarse) ta.focus({ preventScroll: true });
+      }, reduce ? 800 : 2600);
+      setTimeout(() => document.body.classList.remove('dawn'), 9000);
+    };
+  }
+  function showVerse(ref, kind){
+    $('afterLine').textContent = kind === 'thanks' ? pick(AFTER_THX)
+      : kind === 'prayer' ? pick([`You carried ${lastPerson} to Him.`, `He holds ${lastPerson} too.`, `${lastPerson}, lifted up in prayer.`])
+      : pick(AFTER_LAY);
+    $('verseText').textContent = '“' + V[ref] + '”';
+    $('verseRef').textContent = ref + ' (CSB)';
+    $('verse').classList.add('show');
+  }
+
+  // ---------- Embers (burdens) & counts ----------
+  function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const emberG = $('emberG');
+  function renderMarks(fresh){
+    const n = burdenCount(), t = thanksCount(), pc = prayCount();
+    const pg = $('emberPG'), pShown = Math.min(pc, 24);
+    while (pg.children.length < pShown) {
+      const i = pg.children.length, r = rng(i + 501);
+      const side = i % 2 === 0 ? -1 : 1, dist = Math.min(80, 12 + Math.floor(i / 2) * 6 + r() * 4);
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', (260 + side * dist).toFixed(1)); c.setAttribute('cy', (326 + r() * 6 + dist * .05).toFixed(1));
+      c.setAttribute('r', '4'); c.setAttribute('fill', 'url(#emberGrad2)'); c.style.animationDelay = (r() * 3).toFixed(2) + 's';
+      if (fresh && i === pShown - 1) c.classList.add('born');
+      pg.append(c);
+    }
+    const shown = Math.min(n, 40);
+    while (emberG.children.length < shown) {
+      const i = emberG.children.length, r = rng(i + 11);
+      const side = i % 2 === 0 ? 1 : -1;
+      const dist = Math.min(88, 6 + Math.floor(i / 2) * 4.6 + r() * 3);
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', (260 + side * dist).toFixed(1));
+      c.setAttribute('cy', (318 + r() * 9 + dist * .07).toFixed(1));
+      c.setAttribute('r', '4.6'); c.setAttribute('fill', 'url(#emberGrad)');
+      c.style.animationDelay = (r() * 3).toFixed(2) + 's';
+      if (fresh && i === shown - 1) c.classList.add('born');
+      emberG.append(c);
+    }
+    const parts = [];
+    if (n) parts.push(n === 1 ? 'One burden left at the cross' : `${n} burdens left at the cross`);
+    if (pc) parts.push(pc === 1 ? 'one prayer for someone you love' : `${pc} prayers for those you love`);
+    if (t) parts.push(t === 1 ? 'one thanksgiving among the stars' : `${t} thanksgivings among the stars`);
+    const sentence = parts.length <= 1 ? parts.join('') : parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
+    $('count').textContent = sentence ? sentence.charAt(0).toUpperCase() + sentence.slice(1) + '.' : '';
+    $('jCount').textContent = entries.length ? String(entries.length) : '';
+    $('lookback').hidden = entries.length === 0;
+  }
+
+  // ---------- Sound ----------
+  let soundOn = ls.get('sound') !== 'off';
+  let actx = null, master = null, verb = null;
+  function renderSoundBtn(){
+    const b = $('soundBtn');
+    b.setAttribute('aria-pressed', soundOn); b.setAttribute('aria-label', soundOn ? 'Sound on' : 'Sound off');
+    $('soundLabel').textContent = soundOn ? 'Sound on' : 'Sound off';
+    $('waves').style.display = soundOn ? '' : 'none'; $('mute').style.display = soundOn ? 'none' : '';
+  }
+  $('soundBtn').addEventListener('click', () => {
+    soundOn = !soundOn; ls.set('sound', soundOn ? 'on' : 'off'); renderSoundBtn();
+    if (soundOn && initAudio()) chime(0.5);
+  });
+  renderSoundBtn();
+  function initAudio(){
+    if (actx) { if (actx.state !== 'running') actx.resume().catch(() => {}); return true; }
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+      actx = new AC();
+      // iOS: play a silent buffer inside the tap to unlock audio
+      const sb = actx.createBuffer(1, 1, 22050), ss = actx.createBufferSource(); ss.buffer = sb; ss.connect(actx.destination); ss.start(0);
+      if (actx.state !== 'running') actx.resume().catch(() => {});
+      master = actx.createGain(); master.gain.value = 0.55;
+      verb = actx.createConvolver();
+      const len = actx.sampleRate * 4, ir = actx.createBuffer(2, len, actx.sampleRate);
+      for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+      verb.buffer = ir;
+      const wet = actx.createGain(); wet.gain.value = 0.6; verb.connect(wet).connect(master); master.connect(actx.destination);
+      return true;
+    } catch(e){ actx = null; return false; }
+  }
+  function out(node, dry = .7){ const d = actx.createGain(); d.gain.value = dry; node.connect(d).connect(master); node.connect(verb); }
+  function wind(dur){
+    if (!soundOn || !actx) return;
+    const t = actx.currentTime, len = Math.ceil(actx.sampleRate * dur), buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    let last = 0; for (let i = 0; i < len; i++) { last = (last + .02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3.5; }
+    const src = actx.createBufferSource(); src.buffer = buf;
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = .8;
+    bp.frequency.setValueAtTime(260, t); bp.frequency.exponentialRampToValueAtTime(1100, t + dur);
+    const g = actx.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.18, t + dur * .6); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    src.connect(bp).connect(g); out(g, .6); src.start(t); src.stop(t + dur + .05);
+  }
+  function bell(f, when, amp, len){
+    [[1, amp], [2.01, amp * .3], [3, amp * .12]].forEach(([m, a], k) => {
+      const o = actx.createOscillator(); o.type = 'sine'; o.frequency.value = f * m;
+      const g = actx.createGain(); g.gain.setValueAtTime(.0001, when); g.gain.exponentialRampToValueAtTime(a, when + .015); g.gain.exponentialRampToValueAtTime(.0001, when + (k ? len * .5 : len));
+      o.connect(g); out(g, .55); o.start(when); o.stop(when + len + .2);
+    });
+  }
+  function chime(scale = 1){
+    if (!soundOn || !actx) return;
+    const t = actx.currentTime + .02;
+    const chord = pick([[261.63, 329.63, 392.0, 523.25], [293.66, 369.99, 440.0, 587.33], [246.94, 311.13, 369.99, 493.88]]);
+    chord.forEach((f, i) => bell(f, t + i * .11, .16 * scale, 4.2));
+    [chord[0] / 2, chord[2] / 2].forEach(f => {
+      const o = actx.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700;
+      const g = actx.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.07 * scale, t + 1.2); g.gain.exponentialRampToValueAtTime(.0001, t + 6);
+      o.connect(lp).connect(g); out(g, .5); o.start(t); o.stop(t + 6.2);
+    });
+  }
+  function thanksChime(){
+    if (!soundOn || !actx) return;
+    const t = actx.currentTime + .02;
+    [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => bell(f, t + i * .09, .1, 3));
+  }
+
+  // ---------- Dictation (works where offered; iPhone uses the keyboard mic) ----------
+  let dict = null;
+  (async () => {
+    try {
+      if (!window.claude || typeof window.claude.use !== 'function') return;
+      const d = await window.claude.use('dictation');
+      if (!d) return;
+      dict = d;
+      const mic = $('mic'); mic.hidden = false;
+      d.onState(({ state, reason }) => {
+        mic.classList.toggle('listening', state !== 'idle');
+        mic.setAttribute('aria-label', state === 'idle' ? 'Speak instead of typing' : 'Stop listening');
+        if (state === 'idle') { $('partial').textContent = ''; if (reason === 'unavailable' || reason === 'not_granted') mic.hidden = true; }
+      });
+      d.onPartial(({ text }) => { $('partial').textContent = text; });
+      d.onFinal(({ text }) => {
+        ta.value = ta.value ? ta.value + text : text.replace(/^\s+/, '');
+        ta.dispatchEvent(new Event('input'));
+      });
+      mic.addEventListener('click', () => {
+        if (d.active()) { d.stop().catch(() => {}); return; }
+        d.start().catch(err => { if (err && (err.code === 'not_granted' || err.code === 'unavailable')) mic.hidden = true; });
+      });
+    } catch(e){}
+  })();
+
+  // ---------- Journal storage ----------
+  const readLocal = () => { try { return JSON.parse(ls.get('journal', '[]')) || []; } catch(e){ return []; } };
+  const writeLocal = list => ls.set('journal', JSON.stringify(list));
+  const norm = e => ({ kind: 'burden', answered: false, ...e });
+  entries = readLocal().map(norm).sort((a, b) => b.ts - a.ts);
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+  async function keepEntry(fields){
+    const body = { ...fields, ts: Date.now(), answered: false };
+    const id = newId();
+    entries = [{ id, ...body }, ...entries];
+    renderJournal(); renderMarks(false); if (mode === 'pray') renderPeople();
+    if (cloud) { try { await cloud.entries.doc(id).set(body); return; } catch(e){} }
+    writeLocal(entries);
+  }
+  async function updateEntry(id, patch){
+    entries = entries.map(e => e.id === id ? { ...e, ...patch } : e);
+    renderJournal();
+    if (cloud) { try { await cloud.entries.doc(id).update(patch); return; } catch(e){} }
+    writeLocal(entries);
+  }
+  async function removeEntry(id){
+    entries = entries.filter(e => e.id !== id);
+    renderJournal(); renderMarks(false);
+    if (cloud) { try { await cloud.entries.doc(id).delete(); return; } catch(e){} }
+    writeLocal(entries);
+  }
+  async function hashPin(pin){
+    try { const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('leave-it-at-the-cross:' + pin)); return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+    catch(e){ return 'p:' + pin.split('').reverse().join(''); }
+  }
+  async function savePin(h){
+    pinHash = h; ls.set('pin', h);
+    if (cloud) { try { await cloud.settings.set({ pinHash: h }); } catch(e){} }
+    renderFoot();
+  }
+  (async () => {
+    try {
+      if (!window.claude || typeof window.claude.use !== 'function') return;
+      const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+      if (!db || !user) return;
+      const uid = await user.id(); if (!uid) return;
+      const entriesRef = db.doc('data/users/' + uid + '/journal').collection('entries');
+      const settingsRef = db.doc('data/users/' + uid + '/settings');
+      const s = await settingsRef.get();
+      const cloudPin = s.exists ? s.data().pinHash : null;
+      if (cloudPin) { pinHash = cloudPin; ls.set('pin', cloudPin); }
+      cloud = { entries: entriesRef, settings: settingsRef };
+      const local = readLocal();
+      for (const e of local) { const { id, ...body } = e; try { await entriesRef.doc(id || newId()).set(body); } catch(err){ cloud = null; return; } }
+      if (local.length) writeLocal([]);
+      if (pinHash && !cloudPin) { try { await settingsRef.set({ pinHash }); } catch(e){} }
+      entriesRef.orderBy('ts', 'desc').onSnapshot(snap => {
+        entries = snap.docs.map(d => norm({ id: d.id, ...d.data() }));
+        renderJournal(); renderMarks(false); renderFoot();
+      }, () => {});
+      renderFoot();
+    } catch(e){ cloud = null; }
+  })();
+
+  // ---------- Journal UI ----------
+  const jEl = $('journal'), jBack = $('jBack');
+  function fmtDate(ts){ try { return new Date(ts).toLocaleDateString(undefined, { month:'long', day:'numeric', year:'numeric' }); } catch(e){ return ''; } }
+  function renderFoot(){
+    $('pinToggle').textContent = pinHash ? 'Change passcode' : 'Set a passcode';
+    $('pinRemove').hidden = !pinHash;
+    $('jWhere').textContent = cloud ? 'Kept privately in your account. Only you can open it.' : 'Kept only in this browser on this device.';
+  }
+  function el(tag, cls, text){ const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function foldable(text){
+    const t = el('p', 'jtext folded', text);
+    t.tabIndex = 0; t.setAttribute('role', 'button'); t.setAttribute('aria-label', 'Unfold to read');
+    const toggle = () => { t.classList.toggle('folded'); t.setAttribute('aria-label', t.classList.contains('folded') ? 'Unfold to read' : 'Fold away'); };
+    t.addEventListener('click', toggle);
+    t.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(); } });
+    return t;
+  }
+  function confirmRemove(acts, id){
+    acts.textContent = '';
+    const yes = el('button', 'jlink danger', 'Yes, remove'), no = el('button', 'jlink', 'Keep it');
+    yes.type = no.type = 'button';
+    yes.onclick = () => removeEntry(id); no.onclick = () => renderJournal();
+    acts.append(el('span', null, 'Remove this for good?'), yes, no);
+  }
+  function answerForm(li, e){
+    const f = el('form', 'ansform');
+    const lab = el('label', null, 'How did He answer? (optional)'); lab.style.cssText = 'display:block;font-size:13px;color:rgba(59,50,38,.7);margin-bottom:6px';
+    const t = el('textarea'); t.value = e.answerNote || ''; t.maxLength = 1000; t.placeholder = 'Write what He did, so you can remember…';
+    const r = el('div', 'rowb'); const save = el('button', 'jbtn', e.answered ? 'Save' : 'Set this stone'); save.type = 'submit';
+    const cancel = el('button', 'jlink', 'Cancel'); cancel.type = 'button'; cancel.onclick = () => renderJournal();
+    r.append(save, cancel); f.append(lab, t, r);
+    f.addEventListener('submit', ev => { ev.preventDefault(); updateEntry(e.id, { answered: true, answerNote: t.value.trim(), answeredTs: e.answeredTs || Date.now() }); });
+    li.querySelector('.jactions').replaceWith(f);
+    t.focus();
+  }
+  const STONE_SVG = '<svg width="34" height="28" viewBox="0 0 34 28" aria-hidden="true"><defs><radialGradient id="sg" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#9a8f95"/><stop offset="1" stop-color="#4a4046"/></radialGradient></defs><path d="M4 22c-3-5 1-14 9-17 7-3 16 0 18 7 2 6-1 12-8 14-7 2-16 1-19-4z" fill="url(#sg)"/><path d="M9 11c3-3 8-4 12-3" stroke="#fff" stroke-opacity=".35" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>';
+
+  function renderJournal(){
+    const list = $('jList'), top = $('jTop'), empty = $('jEmpty');
+    list.textContent = ''; top.textContent = '';
+    document.querySelectorAll('.jtab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === jTab));
+    const burdens = entries.filter(e => e.kind === 'burden'), thanks = entries.filter(e => e.kind === 'thanks'), prayers = entries.filter(e => e.kind === 'prayer');
+    const stones = entries.filter(e => e.kind !== 'thanks' && e.answered).sort((a, b) => (b.answeredTs || b.ts) - (a.answeredTs || a.ts));
+    const bits = [];
+    if (burdens.length) bits.push(`${burdens.length} laid down`);
+    if (prayers.length) bits.push(prayers.length === 1 ? '1 prayer for others' : `${prayers.length} prayers for others`);
+    if (thanks.length) bits.push(thanks.length === 1 ? '1 thanksgiving' : `${thanks.length} thanksgivings`);
+    if (stones.length) bits.push(`${stones.length} answered`);
+    $('jSub').textContent = bits.length ? (bits.length === 1 ? bits[0] : bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1]).replace(/^./, c => c.toUpperCase()) : 'What you have given Him';
+
+    if (jTab === 'stones') {
+      const eb = el('div', 'eben');
+      eb.append(el('p', null, '“Afterward, Samuel took a stone and set it upright between Mizpah and Shen. He named it Ebenezer, explaining, ‘The LORD has helped us to this point.’”'), el('cite', null, '1 Samuel 7:12 (CSB)'));
+      const kb = el('button', 'jbtn', 'Make this year’s keepsake'); kb.type = 'button'; kb.onclick = openKeepsake; eb.append(kb);
+      top.append(eb);
+      empty.hidden = stones.length > 0;
+      empty.textContent = 'When God answers something you laid down, open it in “Laid down” and tap “Mark as answered.” It will become a stone here, so you can remember what He has done.';
+      for (const e of stones) {
+        const li = el('li', 'stone'); li.dataset.id = e.id;
+        const ic = el('div'); ic.innerHTML = STONE_SVG;
+        const body = el('div'); body.style.flex = '1';
+        body.append(el('div', 'when', `Answered ${fmtDate(e.answeredTs || e.ts)}` + (e.person ? `, a prayer for ${e.person}` : e.cat ? `, ${catLabel(e.cat).toLowerCase()}` : '')));
+        body.append(el('div', 'how' + (e.answerNote ? '' : ' none'), e.answerNote || 'He answered.'));
+        body.append(el('div', 'orig', `${e.kind === 'prayer' ? 'What you prayed' : 'What you laid down'} on ${fmtDate(e.ts)}`));
+        body.append(foldable(e.text));
+        const acts = el('div', 'jactions');
+        const ed = el('button', 'jlink', 'Edit'); ed.type = 'button'; ed.onclick = () => answerForm(li, e);
+        const sh = el('button', 'jlink', 'Share testimony'); sh.type = 'button'; sh.onclick = () => openShare(e);
+        acts.append(sh, ed); body.append(acts);
+        li.append(ic, body); list.append(li);
+      }
+      return;
+    }
+    const shown = jTab === 'burden' ? burdens : jTab === 'thanks' ? thanks : jTab === 'people' ? prayers : entries;
+    empty.hidden = shown.length > 0;
+    empty.textContent = jTab === 'thanks' ? 'Nothing here yet. Switch to “Give thanks” to offer something with gratitude.'
+      : jTab === 'people' ? 'Nothing here yet. Switch to “Pray for others” to carry someone you love to the cross.'
+      : 'Nothing kept here yet. What you lay down with “Keep in My Journal” on will rest here.';
+    let groupKey = null, groupList = list;
+    const ordered = jTab === 'people' ? [...shown].sort((a, b) => (a.person || '').localeCompare(b.person || '') || b.ts - a.ts) : shown;
+    for (const e of ordered) {
+      if (jTab === 'people' && (e.person || '').toLowerCase() !== groupKey) {
+        groupKey = (e.person || '').toLowerCase();
+        const n = shown.filter(x => (x.person || '').toLowerCase() === groupKey);
+        const g = el('li', 'pgroup'); const h = el('h3', null, e.person || 'Someone');
+        h.append(el('span', null, `${n.length} prayer${n.length === 1 ? '' : 's'}` + (n.some(x => x.answered) ? ` · ${n.filter(x => x.answered).length} answered` : '')));
+        const ul = el('ul', 'jlist'); g.append(h, ul); list.append(g); groupList = ul;
+      }
+      const li = el('li', 'jitem k-' + e.kind); li.dataset.id = e.id;
+      const meta = el('div', 'jmeta', fmtDate(e.ts));
+      if (e.cat) meta.append(el('span', null, catLabel(e.cat)));
+      if (e.ref) meta.append(el('span', 'ref', e.ref));
+      if (e.kind === 'thanks') meta.append(el('span', 'badge thx', 'Thanks'));
+      if (e.kind === 'prayer' && jTab !== 'people') meta.append(el('span', 'badge pray', 'For ' + (e.person || 'someone')));
+      if (e.answered) meta.append(el('span', 'badge ans', 'Answered'));
+      const acts = el('div', 'jactions');
+      if (e.kind !== 'thanks') {
+        const a = el('button', 'jlink', e.answered ? 'Edit how He answered' : 'Mark as answered'); a.type = 'button';
+        a.onclick = () => answerForm(li, e);
+        acts.append(a);
+        if (e.answered) { const u = el('button', 'jlink', 'Unmark'); u.type = 'button'; u.onclick = () => updateEntry(e.id, { answered: false }); acts.append(u); }
+      }
+      if (e.answered) { const sh = el('button', 'jlink', 'Share testimony'); sh.type = 'button'; sh.onclick = () => openShare(e); acts.append(sh); }
+      const rm = el('button', 'jlink danger', 'Remove'); rm.type = 'button'; rm.onclick = () => confirmRemove(acts, e.id);
+      acts.append(rm);
+      li.append(meta, foldable(e.text), acts);
+      groupList.append(li);
+    }
+  }
+  document.querySelectorAll('.jtab').forEach(b => b.addEventListener('click', () => { jTab = b.dataset.tab; renderJournal(); $('jBody').scrollTop = 0; }));
+
+  let pendingFocus = null;
+  function focusEntry(id){
+    jTab = 'all'; renderJournal();
+    const li = $('jList').querySelector(`[data-id="${CSS.escape(id)}"]`); if (!li) return;
+    const t = li.querySelector('.jtext'); if (t) t.classList.remove('folded');
+    li.classList.add('flash'); li.scrollIntoView({ block:'center', behavior: reduce ? 'auto' : 'smooth' });
+  }
+  function showLocked(locked){
+    $('jLock').hidden = !locked; $('jBody').hidden = locked; $('jTabs').hidden = locked;
+    $('pinCtrls').style.visibility = locked ? 'hidden' : 'visible';
+    $('jSub').style.visibility = locked ? 'hidden' : 'visible';
+    $('pinErr').textContent = ''; $('pinIn').value = '';
+    if (locked) setTimeout(() => $('pinIn').focus(), 400);
+  }
+  function openJournal(opts = {}){
+    unlocked = !pinHash; pendingFocus = opts.focusId || null;
+    renderJournal(); renderFoot(); $('pinForm').hidden = true;
+    showLocked(!unlocked);
+    jEl.hidden = false; jBack.hidden = false; document.documentElement.classList.add('locked');
+    requestAnimationFrame(() => { jEl.classList.add('open'); jBack.classList.add('open'); });
+    if (unlocked && pendingFocus) setTimeout(() => focusEntry(pendingFocus), 450);
+  }
+  function closeJournal(){
+    jEl.classList.remove('open'); jBack.classList.remove('open'); unlocked = false;
+    document.documentElement.classList.remove('locked');
+    setTimeout(() => { jEl.hidden = true; jBack.hidden = true; jTab = 'all'; renderJournal(); }, 450);
+  }
+  $('jOpen').addEventListener('click', () => openJournal());
+  $('jOpen2').addEventListener('click', () => openJournal());
+  const emberHit = $('emberHit');
+  emberHit.addEventListener('click', () => openJournal());
+  emberHit.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openJournal(); } });
+  $('jClose').addEventListener('click', closeJournal);
+  jBack.addEventListener('click', closeJournal);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !jEl.hidden) closeJournal(); });
+  // swipe down on the grab bar / header to close
+  (() => {
+    let y0 = null;
+    const h = jEl.querySelector('.jhead'), g = jEl.querySelector('.grab');
+    [h, g].forEach(n => {
+      n.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, { passive: true });
+      n.addEventListener('touchend', e => { if (y0 !== null && e.changedTouches[0].clientY - y0 > 70) closeJournal(); y0 = null; }, { passive: true });
+    });
+  })();
+  $('pinGoForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const h = await hashPin($('pinIn').value.trim());
+    if (h === pinHash) { unlocked = true; showLocked(false); if (pendingFocus) setTimeout(() => focusEntry(pendingFocus), 50); }
+    else { $('pinErr').textContent = 'That passcode doesn’t match.'; $('pinIn').value = ''; }
+  });
+  $('pinToggle').addEventListener('click', () => {
+    if (!unlocked) return;
+    const f = $('pinForm'); f.hidden = !f.hidden; $('pinSetErr').textContent = ''; $('pinNew').value = '';
+    if (!f.hidden) { $('pinNew').focus(); f.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  });
+  $('pinSetForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const v = $('pinNew').value.trim();
+    if (!/^\d{4,8}$/.test(v)) { $('pinSetErr').textContent = 'Use 4 to 8 digits.'; return; }
+    await savePin(await hashPin(v)); $('pinForm').hidden = true;
+  });
+  $('pinRemove').addEventListener('click', async () => { if (unlocked) await savePin(null); });
+
+  // ---------- Testimony card ----------
+  let downloads = null, shareEntry = null, shareBlob = null, shareTimer = null;
+  const inClaude = !!(window.claude && typeof window.claude.use === 'function');
+  if (!inClaude) $('shareSave').hidden = false;
+  (async () => { try { if (inClaude) { downloads = await window.claude.use('downloads'); if (downloads) $('shareSave').hidden = false; } } catch(e){} })();
+  // Save a file: Claude's save sheet when inside Claude, otherwise the phone's share sheet or a normal download.
+  async function saveBlob(blob, filename){
+    if (downloads) { await downloads.save({ filename, data: blob }); return 'saved'; }
+    let file = null; try { file = new File([blob], filename, { type: blob.type }); } catch(e){}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: filename.replace(/\.\w+$/, '') }); return 'shared'; }
+      catch(err){ if (err && err.name === 'AbortError') throw { code: 'declined' }; }
+    }
+    if (!inClaude) {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.rel = 'noopener';
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 8000); return 'saved';
+    }
+    throw { code: 'unavailable' };
+  }
+  function wrap(ctx, text, maxW){
+    const out = [];
+    for (const para of text.split(/\n+/)) {
+      let line = '';
+      for (const w of para.split(/\s+/)) {
+        const test = line ? line + ' ' + w : w;
+        if (ctx.measureText(test).width > maxW && line) { out.push(line); line = w; } else line = test;
+      }
+      if (line) out.push(line);
+    }
+    return out;
+  }
+  async function drawCard(text, e){
+    try { await Promise.all([document.fonts.load('italic 64px "Libre Caslon Text"'), document.fonts.load('400 64px "Libre Caslon Text"'), document.fonts.load('400 64px "Libre Caslon Display"'), document.fonts.load('500 30px "Hanken Grotesk"')]); } catch(err){}
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1350;
+    const x = c.getContext('2d');
+    const bg = x.createLinearGradient(0, 0, 0, 1350);
+    bg.addColorStop(0, '#141b33'); bg.addColorStop(.5, '#4b3a5e'); bg.addColorStop(.82, '#b9746a'); bg.addColorStop(1, '#e9b07a');
+    x.fillStyle = bg; x.fillRect(0, 0, 1080, 1350);
+    const r = rng(e && e.ts ? e.ts % 9973 : 7);
+    for (let i = 0; i < 90; i++) { x.globalAlpha = .25 + r() * .5; x.fillStyle = '#fff4dc'; x.beginPath(); x.arc(r() * 1080, r() * 700, r() * 2 + .4, 0, 6.283); x.fill(); }
+    x.globalAlpha = 1;
+    const glow = x.createRadialGradient(540, 300, 0, 540, 300, 420);
+    glow.addColorStop(0, 'rgba(255,230,173,.55)'); glow.addColorStop(.4, 'rgba(247,201,107,.15)'); glow.addColorStop(1, 'rgba(247,201,107,0)');
+    x.fillStyle = glow; x.fillRect(0, 0, 1080, 800);
+    // cross
+    x.fillStyle = '#6a4630'; x.fillRect(522, 150, 36, 300); x.fillRect(450, 225, 180, 32);
+    x.fillStyle = 'rgba(255,214,140,.35)'; x.fillRect(522, 150, 4, 300); x.fillRect(450, 225, 180, 3);
+    // linen
+    x.fillStyle = '#f7efdf';
+    x.beginPath(); x.moveTo(506, 224); x.bezierCurveTo(526, 218, 554, 218, 574, 224); x.lineTo(582, 262); x.bezierCurveTo(590, 300, 588, 330, 584, 350); x.lineTo(568, 340); x.bezierCurveTo(566, 300, 560, 280, 552, 266); x.bezierCurveTo(544, 276, 536, 276, 528, 266); x.bezierCurveTo(520, 280, 514, 300, 512, 352); x.lineTo(496, 342); x.bezierCurveTo(492, 320, 494, 290, 498, 262); x.closePath(); x.fill();
+    // hill
+    const hg = x.createLinearGradient(0, 455, 0, 640); hg.addColorStop(0, 'rgba(26,19,30,.95)'); hg.addColorStop(.45, 'rgba(26,19,30,.75)'); hg.addColorStop(1, 'rgba(26,19,30,0)');
+    x.fillStyle = hg; x.beginPath(); x.moveTo(60, 640); x.bezierCurveTo(250, 470, 830, 470, 1020, 640); x.closePath(); x.fill();
+    // stone
+    const sg = x.createRadialGradient(520, 455, 4, 540, 470, 46); sg.addColorStop(0, '#a0959b'); sg.addColorStop(1, '#4a4046');
+    x.fillStyle = sg; x.beginPath(); x.ellipse(540, 468, 44, 26, 0, 0, 6.283); x.fill();
+    // label
+    x.textAlign = 'center'; x.fillStyle = '#f3d9a4';
+    x.font = 'italic 40px "Libre Caslon Text", Georgia, serif';
+    x.fillText('He answered', 540, 640);
+    // testimony text, sized to fit
+    const body = (text || 'He answered.').trim();
+    let size = 64, lines;
+    for (size = 56; size >= 32; size -= 2) { x.font = `italic ${size}px "Libre Caslon Text", Georgia, serif`; lines = wrap(x, '“' + body + '”', 860); if (lines.length * size * 1.4 <= 390) break; }
+    x.fillStyle = '#fffaf0';
+    const lh = size * 1.4, startY = 760 + (390 - lines.length * lh) / 2;
+    lines.forEach((l, i) => x.fillText(l, 540, startY + i * lh));
+    // verse
+    x.fillStyle = 'rgba(43,33,18,.92)'; x.font = 'italic 34px "Libre Caslon Text", Georgia, serif';
+    x.fillText('“The LORD has helped us to this point.”', 540, 1215);
+    x.font = '400 24px "Hanken Grotesk", sans-serif'; x.fillStyle = 'rgba(43,33,18,.75)';
+    x.fillText('1 Samuel 7:12 (CSB)', 540, 1262);
+    if (e && (e.answeredTs || e.ts)) { x.font = '400 22px "Hanken Grotesk", sans-serif'; x.fillStyle = 'rgba(43,33,18,.6)'; x.fillText(fmtDate(e.answeredTs || e.ts), 540, 1300); }
+    return c;
+  }
+  async function renderShare(){
+    const c = await drawCard($('shareText').value, shareEntry);
+    $('shareImg').src = c.toDataURL('image/png');
+    shareBlob = await new Promise(res => c.toBlob(res, 'image/png'));
+  }
+  function openShare(e){
+    shareEntry = e; $('shareText').value = e.answerNote || ''; $('shareMsg').textContent = '';
+    $('shareHold').textContent = coarse ? 'You can also press and hold the image to save or share it.' : '';
+    $('share').hidden = false; renderShare();
+  }
+  $('shareText').addEventListener('input', () => { clearTimeout(shareTimer); shareTimer = setTimeout(renderShare, 300); });
+  $('shareClose').addEventListener('click', () => { $('share').hidden = true; });
+  $('share').addEventListener('click', ev => { if (ev.target === $('share')) $('share').hidden = true; });
+  $('shareSave').addEventListener('click', async () => {
+    try {
+      if (!shareBlob) await renderShare();
+      const r = await saveBlob(shareBlob, 'testimony.png');
+      $('shareMsg').textContent = r === 'shared' ? '' : 'Saved.';
+    } catch(err){
+      if (err && (err.code === 'unavailable' || err.code === 'not_granted')) { $('shareSave').hidden = true; $('shareMsg').textContent = 'Saving isn’t available here. Press and hold the image instead.'; }
+      else if (!(err && err.code === 'declined')) $('shareMsg').textContent = 'That didn’t save. Please try again.';
+    }
+  });
+  $('shareCopy').addEventListener('click', async () => {
+    const t = `“${($('shareText').value || 'He answered.').trim()}”\n\nThe LORD has helped us to this point. (1 Samuel 7:12, CSB)`;
+    try { await navigator.clipboard.writeText(t); $('shareMsg').textContent = 'Copied.'; }
+    catch(err){ $('shareMsg').textContent = 'Copying isn’t allowed here. Press and hold the text box to copy instead.'; }
+  });
+
+
+  // ---------- Year-end keepsake ----------
+  const KW = 1275, KH = 1650;
+  let jspdfP = null, kTimer = null, kCanvases = [], kPdf = null;
+  function loadJsPDF(){
+    if (window.jspdf) return Promise.resolve();
+    if (!jspdfP) jspdfP = new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'; s.onload = res; s.onerror = () => { jspdfP = null; rej(); }; document.head.append(s); });
+    return jspdfP;
+  }
+  const yearOf = ts => new Date(ts).getFullYear();
+  function yearsAvailable(){
+    const ys = new Set([new Date().getFullYear()]);
+    entries.forEach(e => { ys.add(yearOf(e.ts)); if (e.answeredTs) ys.add(yearOf(e.answeredTs)); });
+    return [...ys].sort((a, b) => b - a);
+  }
+  function yearData(y){
+    return {
+      stones: entries.filter(e => e.kind !== 'thanks' && e.answered && yearOf(e.answeredTs || e.ts) === y).sort((a, b) => (a.answeredTs || a.ts) - (b.answeredTs || b.ts)),
+      thanks: entries.filter(e => e.kind === 'thanks' && yearOf(e.ts) === y).sort((a, b) => a.ts - b.ts),
+      laid: entries.filter(e => e.kind === 'burden' && yearOf(e.ts) === y).length,
+      prayed: entries.filter(e => e.kind === 'prayer' && yearOf(e.ts) === y).length
+    };
+  }
+  const SERIF = '"Libre Caslon Text", Georgia, serif', DISPLAY = '"Libre Caslon Display", "Libre Caslon Text", Georgia, serif', SANS = '"Hanken Grotesk", sans-serif';
+  const INK = '#2B2420', INK2 = 'rgba(43,36,32,.62)', INK3 = 'rgba(43,36,32,.45)';
+  function newPage(){ const c = document.createElement('canvas'); c.width = KW; c.height = KH; return c; }
+  function duskBg(x, seed){
+    const g = x.createLinearGradient(0, 0, 0, KH);
+    g.addColorStop(0, '#0f1328'); g.addColorStop(.45, '#2c2442'); g.addColorStop(.8, '#6e4650'); g.addColorStop(1, '#c98a6c');
+    x.fillStyle = g; x.fillRect(0, 0, KW, KH);
+    const r = rng(seed);
+    x.fillStyle = '#fff4dc';
+    for (let i = 0; i < 140; i++) { x.globalAlpha = .2 + r() * .55; x.beginPath(); x.arc(r() * KW, r() * KH * .62, r() * 2.2 + .4, 0, 6.283); x.fill(); }
+    x.globalAlpha = 1;
+  }
+  function linenBg(x, seed){
+    x.fillStyle = '#F5EEE1'; x.fillRect(0, 0, KW, KH);
+    const r = rng(seed);
+    for (let i = 0; i < 9000; i++) { x.fillStyle = r() < .5 ? 'rgba(90,70,50,.035)' : 'rgba(255,255,255,.06)'; x.fillRect(r() * KW, r() * KH, 1.6, 1.6); }
+    x.strokeStyle = 'rgba(217,164,65,.45)'; x.lineWidth = 1.5; x.strokeRect(70, 70, KW - 140, KH - 140);
+  }
+  function crossArt(x, cx, top, s, glow){
+    if (glow) { const g = x.createRadialGradient(cx, top + 70 * s, 0, cx, top + 70 * s, 300 * s); g.addColorStop(0, 'rgba(255,230,173,.55)'); g.addColorStop(.45, 'rgba(240,201,121,.14)'); g.addColorStop(1, 'rgba(240,201,121,0)'); x.fillStyle = g; x.fillRect(cx - 320 * s, top - 250 * s, 640 * s, 640 * s); }
+    x.save(); x.translate(cx, top); x.scale(s, s);
+    x.fillStyle = '#6a4630'; x.fillRect(-18, 0, 36, 300); x.fillRect(-90, 75, 180, 32);
+    x.fillStyle = 'rgba(255,214,140,.35)'; x.fillRect(-18, 0, 4, 300); x.fillRect(-90, 75, 180, 3);
+    x.fillStyle = '#f7efdf';
+    x.beginPath(); x.moveTo(-34, 74); x.bezierCurveTo(-14, 68, 14, 68, 34, 74); x.lineTo(42, 112); x.bezierCurveTo(50, 150, 48, 180, 44, 200); x.lineTo(28, 190); x.bezierCurveTo(26, 150, 20, 130, 12, 116); x.bezierCurveTo(4, 126, -4, 126, -12, 116); x.bezierCurveTo(-20, 130, -26, 150, -28, 202); x.lineTo(-44, 192); x.bezierCurveTo(-48, 170, -46, 140, -42, 112); x.closePath(); x.fill();
+    x.restore();
+  }
+  function stoneGlyph(x, cx, cy, s){ const g = x.createRadialGradient(cx - 6 * s, cy - 6 * s, 2, cx, cy, 22 * s); g.addColorStop(0, '#a0959b'); g.addColorStop(1, '#4a4046'); x.fillStyle = g; x.beginPath(); x.ellipse(cx, cy, 20 * s, 13 * s, -.15, 0, 6.283); x.fill(); }
+  function starGlyph(x, cx, cy){ const g = x.createRadialGradient(cx, cy, 0, cx, cy, 20); g.addColorStop(0, 'rgba(217,164,65,.95)'); g.addColorStop(1, 'rgba(217,164,65,0)'); x.fillStyle = g; x.beginPath(); x.arc(cx, cy, 20, 0, 6.283); x.fill(); x.strokeStyle = 'rgba(160,110,30,.8)'; x.lineWidth = 2; x.beginPath(); x.moveTo(cx - 14, cy); x.lineTo(cx + 14, cy); x.moveTo(cx, cy - 14); x.lineTo(cx, cy + 14); x.stroke(); }
+  function textBlock(x, text, font, lh, maxW){ x.font = font; return wrap(x, text, maxW).map(l => ({ l, font, lh })); }
+  function footer(x, n, dark){
+    x.textAlign = 'center'; x.font = `400 22px ${SANS}`; x.fillStyle = dark ? 'rgba(245,238,225,.55)' : INK3;
+    x.fillText(String(n), KW / 2, KH - 100); x.textAlign = 'left';
+  }
+  function centerLines(x, lines, y, color){
+    x.textAlign = 'center'; x.fillStyle = color;
+    lines.forEach(o => { x.font = o.font; y += o.lh; x.fillText(o.l, KW / 2, y - o.lh * .28); });
+    x.textAlign = 'left'; return y;
+  }
+
+  async function buildKeepsake(){
+    try { await Promise.all([document.fonts.load(`400 80px ${DISPLAY}`), document.fonts.load(`400 40px ${SERIF}`), document.fonts.load(`italic 40px ${SERIF}`), document.fonts.load(`400 24px ${SANS}`), document.fonts.load(`500 24px ${SANS}`)]); } catch(e){}
+    const y = parseInt($('kYear').value, 10), name = $('kName').value.trim(), withNames = $('kNames').checked, withPrayed = $('kPrayed').checked;
+    const d = yearData(y), pages = []; let pn = 1;
+
+    // Cover
+    { const c = newPage(), x = c.getContext('2d'); duskBg(x, y);
+      crossArt(x, KW / 2, 230, 1.35, true);
+      const hg = x.createLinearGradient(0, 560, 0, 760); hg.addColorStop(0, 'rgba(26,19,30,.95)'); hg.addColorStop(1, 'rgba(26,19,30,0)');
+      x.fillStyle = hg; x.beginPath(); x.moveTo(120, 760); x.bezierCurveTo(330, 590, 945, 590, 1155, 760); x.closePath(); x.fill();
+      x.textAlign = 'center'; x.fillStyle = '#F6E6C4';
+      x.font = `400 120px ${DISPLAY}`; x.fillText('What God did', KW / 2, 930);
+      x.font = `400 120px ${DISPLAY}`; x.fillText('in ' + y, KW / 2, 1065);
+      x.font = `italic 38px ${SERIF}`; x.fillStyle = 'rgba(245,238,225,.82)'; x.fillText('Stones of remembrance and thanksgivings', KW / 2, 1160);
+      if (name) { x.font = `400 30px ${SANS}`; x.fillStyle = 'rgba(245,238,225,.7)'; x.fillText('Kept by ' + name, KW / 2, 1235); }
+      x.font = `italic 34px ${SERIF}`; x.fillStyle = 'rgba(43,30,20,.9)'; x.fillText('“The LORD has helped us to this point.”', KW / 2, 1470);
+      x.font = `400 24px ${SANS}`; x.fillStyle = 'rgba(43,30,20,.7)'; x.fillText('1 Samuel 7:12 (CSB)', KW / 2, 1515);
+      x.textAlign = 'left'; pages.push(c); pn++; }
+
+    // The year at a glance
+    { const c = newPage(), x = c.getContext('2d'); linenBg(x, y + 1);
+      x.font = `400 72px ${DISPLAY}`; x.fillStyle = INK; x.textAlign = 'center'; x.fillText('The year at a glance', KW / 2, 300); x.textAlign = 'left';
+      const n = (k, one, many) => k === 1 ? one : `${k} ${many}`;
+      const parts = [];
+      if (d.laid) parts.push(`laid ${n(d.laid, 'one burden', 'burdens')} at the cross`);
+      if (d.prayed) parts.push(`carried ${n(d.prayed, 'one prayer', 'prayers')} for people you love`);
+      if (d.thanks.length) parts.push(`gave thanks ${d.thanks.length === 1 ? 'once' : d.thanks.length + ' times'}`);
+      let s1 = parts.length ? 'This year you ' + (parts.length === 1 ? parts[0] : parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1]) + '.' : 'This year is just beginning.';
+      const s2 = d.stones.length ? (d.stones.length === 1 ? ' And you saw Him answer one of them.' : ` And you saw Him answer ${d.stones.length} of them.`) : '';
+      let yy = centerLines(x, textBlock(x, s1 + s2, `400 44px ${SERIF}`, 74, 900), 420, INK);
+      yy += 120;
+      x.strokeStyle = 'rgba(217,164,65,.7)'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(KW / 2 - 60, yy); x.lineTo(KW / 2 + 60, yy); x.stroke();
+      yy += 60;
+      yy = centerLines(x, textBlock(x, '“' + V['Lamentations 3:22–23'] + '”', `italic 36px ${SERIF}`, 60, 860), yy, INK2);
+      x.textAlign = 'center'; x.font = `400 24px ${SANS}`; x.fillStyle = INK3; x.fillText('Lamentations 3:22–23 (CSB)', KW / 2, yy + 40); x.textAlign = 'left';
+      footer(x, pn++); pages.push(c); }
+
+    // Flowing list sections
+    function section(title, intro, items, measure, drawItem, seed){
+      let c, x, yPos, first = true;
+      const start = () => {
+        c = newPage(); x = c.getContext('2d'); linenBg(x, seed + pages.length);
+        if (first) {
+          x.font = `400 72px ${DISPLAY}`; x.fillStyle = INK; x.fillText(title, 170, 290);
+          let yy = 330; textBlock(x, intro, `italic 30px ${SERIF}`, 48, KW - 340).forEach(o => { x.font = o.font; x.fillStyle = INK2; yy += o.lh; x.fillText(o.l, 170, yy); });
+          yPos = yy + 70; first = false;
+        } else { x.font = `italic 26px ${SERIF}`; x.fillStyle = INK3; x.fillText(title + ', continued', 170, 190); yPos = 260; }
+      };
+      start();
+      for (const it of items) {
+        const h = measure(x, it);
+        if (yPos + h > KH - 190) { footer(x, pn++); pages.push(c); start(); }
+        drawItem(x, it, yPos); yPos += h + 56;
+      }
+      footer(x, pn++); pages.push(c);
+    }
+    const TX = 240, TW = KW - TX - 170;
+    if (d.stones.length) {
+      const stoneParts = (x, e) => {
+        const label = e.kind === 'prayer' ? (withNames && e.person ? `A prayer for ${e.person}` : 'A prayer for someone I love') : (e.cat ? catLabel(e.cat) : 'Something I laid down');
+        const L = [{ l: `Answered ${fmtDate(e.answeredTs || e.ts)}`, font: `500 24px ${SANS}`, lh: 40, color: INK2 }, { l: label, font: `italic 26px ${SERIF}`, lh: 44, color: INK2 }];
+        textBlock(x, e.answerNote || 'He answered.', `400 34px ${SERIF}`, 54, TW).forEach(o => L.push({ ...o, color: INK }));
+        if (withPrayed) { L.push({ l: '', font: `400 10px ${SANS}`, lh: 16, color: INK }); textBlock(x, 'What I prayed: ' + e.text, `italic 26px ${SERIF}`, 42, TW).forEach(o => L.push({ ...o, color: INK3 })); }
+        return L;
+      };
+      section('Stones of remembrance', 'Prayers God answered this year, set down so they are not forgotten.', d.stones,
+        (x, e) => stoneParts(x, e).reduce((s, o) => s + o.lh, 0),
+        (x, e, y0) => { stoneGlyph(x, 190, y0 + 26, 1.2); let yy = y0; stoneParts(x, e).forEach(o => { x.font = o.font; x.fillStyle = o.color; yy += o.lh; x.fillText(o.l, TX, yy - o.lh * .25); }); }, 300);
+    }
+    if (d.thanks.length) {
+      const thxParts = (x, e) => [{ l: fmtDate(e.ts), font: `500 24px ${SANS}`, lh: 40, color: INK2 }, ...textBlock(x, e.text, `400 32px ${SERIF}`, 52, TW).map(o => ({ ...o, color: INK }))];
+      section('Thanksgivings', 'Every good and perfect gift is from above.', d.thanks,
+        (x, e) => thxParts(x, e).reduce((s, o) => s + o.lh, 0),
+        (x, e, y0) => { starGlyph(x, 190, y0 + 24); let yy = y0; thxParts(x, e).forEach(o => { x.font = o.font; x.fillStyle = o.color; yy += o.lh; x.fillText(o.l, TX, yy - o.lh * .25); }); }, 700);
+    }
+    if (!d.stones.length && !d.thanks.length) {
+      const c = newPage(), x = c.getContext('2d'); linenBg(x, 99);
+      centerLines(x, textBlock(x, 'There are no answered prayers or thanksgivings for this year yet. Mark prayers as answered and offer thanks, and they will gather here.', `italic 36px ${SERIF}`, 60, 860), 640, INK2);
+      footer(x, pn++); pages.push(c);
+    }
+
+    // Closing blessing
+    { const c = newPage(), x = c.getContext('2d'); duskBg(x, y + 7);
+      crossArt(x, KW / 2, 260, .8, true);
+      let yy = centerLines(x, textBlock(x, '“' + V['Numbers 6:24–26'] + '”', `italic 44px ${SERIF}`, 74, 900), 720, '#FBF4E6');
+      x.textAlign = 'center'; x.font = `400 26px ${SANS}`; x.fillStyle = 'rgba(245,238,225,.65)'; x.fillText('Numbers 6:24–26 (CSB)', KW / 2, yy + 50);
+      const note = textBlock(x, 'Scripture quotations are from the Christian Standard Bible®, Copyright © 2017 by Holman Bible Publishers. Used by permission. Christian Standard Bible® and CSB® are federally registered trademarks of Holman Bible Publishers.', `400 19px ${SANS}`, 30, 900);
+      centerLines(x, note, KH - 120 - note.length * 30, 'rgba(43,30,20,.7)');
+      x.textAlign = 'left'; pages.push(c); }
+    return pages;
+  }
+  async function renderKeepsake(){
+    $('kMsg').textContent = '';
+    kCanvases = await buildKeepsake();
+    const box = $('kPages'); box.textContent = '';
+    const urls = kCanvases.map(c => c.toDataURL('image/jpeg', .9));
+    urls.forEach((u, i) => { const im = new Image(); im.src = u; im.alt = `Page ${i + 1}`; box.append(im); });
+    kPdf = null;
+    try {
+      await loadJsPDF();
+      const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter', compress: true });
+      urls.forEach((u, i) => { if (i) doc.addPage('letter'); doc.addImage(u, 'JPEG', 0, 0, 612, 792); });
+      kPdf = doc.output('blob');
+    } catch(e){}
+  }
+  function openKeepsake(){
+    const sel = $('kYear'); sel.textContent = '';
+    yearsAvailable().forEach(yv => { const o = document.createElement('option'); o.value = yv; o.textContent = yv; sel.append(o); });
+    $('kName').value = ls.get('kname', '');
+    $('kSave').hidden = inClaude && !downloads;
+    $('kMsg').textContent = ($('kSave').hidden && coarse) ? 'Press and hold a page to save it as an image.' : '';
+    loadJsPDF().catch(() => {});
+    $('keep').hidden = false; renderKeepsake();
+  }
+  ['kYear', 'kNames', 'kPrayed'].forEach(id => $(id).addEventListener('change', renderKeepsake));
+  $('kName').addEventListener('input', () => { ls.set('kname', $('kName').value.trim()); clearTimeout(kTimer); kTimer = setTimeout(renderKeepsake, 400); });
+  $('keepClose').addEventListener('click', () => { $('keep').hidden = true; });
+  $('keep').addEventListener('click', ev => { if (ev.target === $('keep')) $('keep').hidden = true; });
+  $('kSave').addEventListener('click', async () => {
+    const b = $('kSave');
+    if (!kPdf) { $('kMsg').textContent = 'Still preparing your keepsake. Try again in a moment.'; renderKeepsake(); return; }
+    b.disabled = true;
+    try {
+      const r = await saveBlob(kPdf, `What God Did in ${$('kYear').value}.pdf`);
+      $('kMsg').textContent = r === 'shared' ? '' : 'Saved.';
+    } catch(err){
+      if (err && err.code === 'declined') $('kMsg').textContent = '';
+      else if (err && (err.code === 'unavailable' || err.code === 'not_granted')) { b.hidden = true; $('kMsg').textContent = 'Saving a PDF isn’t available here. Press and hold a page to save it as an image.'; }
+      else $('kMsg').textContent = 'The PDF didn’t save. Check your connection and try again.';
+    }
+    b.disabled = false;
+  });
+
+  // ---------- Canvas: sky, thanksgiving stars, sparks ----------
+  const sky = $('sky'), fx = $('fx'), sctx = sky.getContext('2d'), fctx = fx.getContext('2d');
+  let W = 0, H = 0, stars = [], motes = [], sparks = [], newStarAt = 0;
+  function starPos(i){
+    const r = rng(i * 7 + 3);
+    // keep thanksgiving stars in the upper sky, away from the very top bar
+    return { x: W * (.06 + r() * .88), y: H * (.14 + r() * .30) };
+  }
+  function size(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    [sky, fx].forEach(c => { c.width = W * dpr; c.height = H * dpr; c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); });
+    stars = Array.from({ length: Math.min(140, Math.round(W * H / 9000)) }, () => ({ x: Math.random() * W, y: Math.random() * H * .65, r: Math.random() * 1.2 + .2, t: Math.random() * 6.28, s: .005 + Math.random() * .02 }));
+    motes = Array.from({ length: coarse ? 16 : 26 }, () => newMote(true));
+  }
+  function newMote(any){ return { x: Math.random() * W, y: any ? Math.random() * H : H + 10, r: Math.random() * 1.8 + .6, vy: -(.12 + Math.random() * .25), vx: (Math.random() - .5) * .12, a: Math.random() * .5 + .15 }; }
+  function burst(x, y, n){
+    if (reduce) return;
+    for (let i = 0; i < n; i++) {
+      const ang = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.1, sp = Math.random() * 2.6 + .6;
+      sparks.push({ x, y, vx: Math.cos(ang) * sp * .7, vy: Math.sin(ang) * sp, life: 1, decay: .006 + Math.random() * .01, r: Math.random() * 2.2 + .8, hue: 38 + Math.random() * 12 });
+    }
+  }
+  function frame(now){
+    requestAnimationFrame(frame);
+    if (document.hidden) return;
+    sctx.clearRect(0, 0, W, H);
+    sctx.fillStyle = '#fff4dc';
+    for (const s of stars) { s.t += s.s; sctx.globalAlpha = .35 + Math.sin(s.t) * .3; sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, 6.283); sctx.fill(); }
+    sctx.fillStyle = '#f7d79a';
+    for (let i = 0; i < motes.length; i++) { const m = motes[i]; if (!reduce) { m.x += m.vx; m.y += m.vy; } if (m.y < -10) motes[i] = newMote(false); sctx.globalAlpha = m.a; sctx.beginPath(); sctx.arc(m.x, m.y, m.r, 0, 6.283); sctx.fill(); }
+    // thanksgiving stars
+    const tc = thanksCount();
+    for (let i = 0; i < Math.min(tc, 120); i++) {
+      const p = starPos(i), tw = reduce ? 1 : .75 + Math.sin(now / 900 + i * 1.7) * .25;
+      let grow = 1; if (i === tc - 1 && newStarAt) grow = Math.max(0.01, Math.min(1, (now - newStarAt) / 900));
+      const R = 9 * tw * grow;
+      const g = sctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, R * 2.2);
+      g.addColorStop(0, 'rgba(255,246,220,.95)'); g.addColorStop(.25, 'rgba(247,201,107,.55)'); g.addColorStop(1, 'rgba(247,201,107,0)');
+      sctx.globalAlpha = 1; sctx.fillStyle = g; sctx.beginPath(); sctx.arc(p.x, p.y, R * 2.2, 0, 6.283); sctx.fill();
+      sctx.strokeStyle = 'rgba(255,240,200,' + (.55 * tw * grow) + ')'; sctx.lineWidth = 1;
+      sctx.beginPath(); sctx.moveTo(p.x - R * 1.6, p.y); sctx.lineTo(p.x + R * 1.6, p.y); sctx.moveTo(p.x, p.y - R * 1.6); sctx.lineTo(p.x, p.y + R * 1.6); sctx.stroke();
+    }
+    sctx.globalAlpha = 1;
+    fctx.clearRect(0, 0, W, H);
+    if (sparks.length) {
+      fctx.globalCompositeOperation = 'lighter';
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const p = sparks[i]; p.x += p.vx; p.y += p.vy; p.vy -= .012; p.vx *= .99; p.life -= p.decay;
+        if (p.life <= 0) { sparks.splice(i, 1); continue; }
+        const g = fctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+        g.addColorStop(0, `hsla(${p.hue},100%,92%,${p.life})`); g.addColorStop(.4, `hsla(${p.hue},95%,65%,${p.life * .6})`); g.addColorStop(1, `hsla(${p.hue},95%,60%,0)`);
+        fctx.fillStyle = g; fctx.beginPath(); fctx.arc(p.x, p.y, p.r * 4, 0, 6.283); fctx.fill();
+      }
+      fctx.globalCompositeOperation = 'source-over';
+    }
+  }
+  window.addEventListener('resize', size);
+  size(); setMode('lay'); renderMarks(false); renderJournal(); renderFoot(); requestAnimationFrame(frame);
+})();
+</script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>
