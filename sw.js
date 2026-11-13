@@ -1,6 +1,6 @@
 // Lets "Leave It at the Cross" open without a connection after the first visit.
 // When you upload a new version of index.html, change this number so phones pick it up.
-const VERSION = 'at-the-cross-v1';
+const VERSION = 'at-the-cross-v2';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', event => {

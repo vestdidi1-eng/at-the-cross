@@ -89,8 +89,8 @@
   @keyframes born{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
 
   /* Verse after release */
-  .verse{position:relative;z-index:1;max-width:34ch;text-align:center;margin:4px 0 0;max-height:0;opacity:0;overflow:hidden;transition:opacity 1.4s ease,max-height .8s var(--ease),margin .8s var(--ease)}
-  .verse.show{opacity:1;max-height:360px;margin:6px 0 22px}
+  .verse{position:relative;z-index:1;max-width:34ch;text-align:center;margin:4px 0 0;max-height:0;opacity:0;overflow:hidden;transition:opacity 3s ease,max-height 1.2s var(--ease) 2.6s,margin 1.2s var(--ease) 2.6s}
+  .verse.show{opacity:1;max-height:360px;margin:6px 0 22px;transition:opacity 1.4s ease,max-height .8s var(--ease),margin .8s var(--ease)}
   .verse .after{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--gold);margin-bottom:10px}
   .verse blockquote{font-family:var(--serif);font-size:clamp(19px,5vw,23px);line-height:1.5;color:#FBF4E6}
   .verse cite{display:block;margin-top:10px;font-style:normal;font-family:var(--sans);font-size:13px;color:rgba(245,238,225,.55);letter-spacing:.02em}
@@ -772,7 +772,11 @@
       setTimeout(() => document.body.classList.remove('dawn'), 9000);
     };
   }
+  let verseTimer = null;
   function showVerse(ref, kind){
+    clearTimeout(verseTimer);
+    // let the message (and any name in it) quietly fade after a minute and a half
+    verseTimer = setTimeout(() => { $('verse').classList.remove('show'); setTimeout(() => { if (!$('verse').classList.contains('show')) $('afterLine').textContent = ''; }, 3200); }, 90000);
     $('afterLine').textContent = kind === 'thanks' ? pick(AFTER_THX)
       : kind === 'prayer' ? pick([`You carried ${lastPerson} to Him.`, `He holds ${lastPerson} too.`, `${lastPerson}, lifted up in prayer.`])
       : pick(AFTER_LAY);
