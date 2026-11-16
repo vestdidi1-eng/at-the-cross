@@ -115,6 +115,18 @@
   .tmsg p{font-family:var(--serif);font-size:17.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
   .tmsg.new{animation:tnew 1.6s ease}
   @keyframes tnew{0%{background:rgba(240,201,121,.35)}100%{background:transparent}}
+  .pins{margin:0 0 14px;padding:12px 14px 4px;border-radius:12px;background:rgba(58,44,74,.06)}
+  .pins h4{font-family:var(--serif);font-style:italic;font-weight:400;font-size:15.5px;color:var(--ink-2);margin-bottom:2px}
+  .pin{padding:9px 0 6px;border-top:1px solid rgba(43,36,32,.08)}
+  .pin:first-of-type{border-top:none}
+  .pin p{font-family:var(--serif);font-size:17px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+  .pin .since{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+  .pin .acts{display:flex;gap:4px 16px;flex-wrap:wrap}
+  .pin .ansform textarea{min-height:70px}
+  .pinmark{display:inline-flex;align-items:center;gap:4px;margin-left:8px;color:#7A5418;font-size:12px}
+  .tmsg .acts{display:flex;gap:16px;margin-top:2px}
+  .tmsg .acts .jlink{padding:6px 0;font-size:12.5px}
+  .starters{margin:-2px -20px 10px}
   .tempty{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.6;color:var(--ink-2);padding:2px 0 6px}
   .tmore{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-3);margin:-6px 0 8px}
   .card .q{display:block;font-family:var(--serif);font-size:21px;line-height:1.3;font-weight:400;margin-bottom:12px;color:var(--ink)}
@@ -460,10 +472,12 @@
     </div>
     <label class="q" for="burden" id="qLabel">What are you carrying today?</label>
     <div class="talk" id="talk" hidden>
+      <div class="pins" id="pins" hidden></div>
       <div class="thread" id="thread" aria-live="polite"></div>
       <div class="tmore"><span id="tCount"></span><button type="button" class="jlink" id="tEarlier">Earlier days</button></div>
     </div>
     <div class="chips" id="chips" role="group" aria-label="What kind of burden is it?"></div>
+    <div class="chips starters" id="starters" role="group" aria-label="Ways to begin" hidden></div>
     <div class="twrap">
       <textarea id="burden" placeholder="A worry, a fear, a hurt, a regret… write it here and give it to Him." maxlength="1000" enterkeyhint="enter"></textarea>
       <button type="button" class="mic" id="mic" hidden aria-label="Speak instead of typing">
@@ -474,6 +488,7 @@
     <div class="already" id="already" hidden></div>
     <div class="row">
       <label class="keep" id="keepRow"><input type="checkbox" id="keepIt" checked> Keep in My Journal</label>
+      <label class="keep" id="pinRow" hidden><input type="checkbox" id="pinIt"> Keep praying for this</label>
       <button type="submit" class="lay" id="layBtn" disabled>Leave it at the cross</button>
     </div>
     <p class="tip" id="tip"></p>
@@ -653,6 +668,20 @@
   });
   function renderChips(){ chipsEl.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === cat ? 'true' : 'false')); }
 
+  // ---------- Gentle starters (Talk with God) ----------
+  const STARTERS = ['Thank You for ', 'Lord, I need ', 'Help me today with ', 'Forgive me for ', 'I praise You because ', 'Guide me in ', 'Give me peace about ', 'Search my heart about '];
+  STARTERS.forEach(s => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = s.trim() + '…';
+    b.addEventListener('click', () => {
+      const cur = ta.value.replace(/\s+$/, '');
+      ta.value = cur ? cur + '\n' + s : s;
+      ta.dispatchEvent(new Event('input'));
+      ta.focus({ preventScroll: true });
+      try { ta.setSelectionRange(ta.value.length, ta.value.length); } catch(e){}
+    });
+    $('starters').append(b);
+  });
+
   // ---------- Mode ----------
   const MODE_TEXT = {
     lay: ['What are you carrying today?', 'A worry, a fear, a hurt, a regret… write it here and give it to Him.', 'Leave it at the cross'],
@@ -677,7 +706,7 @@
   function setMode(m){
     mode = m;
     ['Lay', 'Thanks', 'Pray', 'Talk'].forEach(k => $('mode' + k).setAttribute('aria-pressed', m === k.toLowerCase()));
-    $('talk').hidden = m !== 'talk'; $('keepRow').hidden = m === 'talk';
+    $('talk').hidden = m !== 'talk'; $('keepRow').hidden = m === 'talk'; $('pinRow').hidden = m !== 'talk'; $('starters').hidden = m !== 'talk';
     if (m === 'talk') renderThread(true);
     chipsEl.hidden = m !== 'lay';
     $('who').hidden = m !== 'pray'; if (m === 'pray') renderPeople();
@@ -738,7 +767,8 @@
     const text = ta.value.trim();
     if (!text || busy) return;
     if (mode === 'talk') {
-      keepEntry({ text, kind: 'talk', ref: null, cat: null, person: null });
+      keepEntry({ text, kind: 'talk', ref: null, cat: null, person: null, pinned: $('pinIt').checked });
+      $('pinIt').checked = false;
       ta.value = ''; ta.dispatchEvent(new Event('input')); $('partial').textContent = '';
       if (dict && dict.active()) dict.stop().catch(() => {});
       if (soundOn && initAudio()) talkChime();
@@ -826,6 +856,7 @@
     box.textContent = '';
     $('tEarlier').hidden = !all.some(e => !sameDay(e.ts, Date.now()));
     $('tCount').textContent = today.length ? (today.length === 1 ? 'One prayer today' : `${today.length} prayers today`) : '';
+    renderPins();
     if (pinHash && !unlocked) {
       const p = document.createElement('p'); p.className = 'tempty';
       p.textContent = today.length ? 'Your prayers from today are kept in My Journal behind your passcode. You can keep praying here.' : 'Start your conversation with Him today. Come back and add to it anytime.';
@@ -840,12 +871,56 @@
     today.forEach((e, i) => {
       const m = document.createElement('div'); m.className = 'tmsg' + (fresh && i === today.length - 1 ? ' new' : '');
       const tm = document.createElement('time'); tm.textContent = fmtTime(e.ts);
+      if (e.pinned && !e.answered) { const pm = document.createElement('span'); pm.className = 'pinmark'; pm.innerHTML = PIN_ICON; pm.append('Pinned'); tm.append(pm); }
       const p = document.createElement('p'); p.textContent = e.text;
-      m.append(tm, p); box.append(m);
+      const acts = document.createElement('div'); acts.className = 'acts';
+      if (!e.answered) {
+        const pb = document.createElement('button'); pb.type = 'button'; pb.className = 'jlink';
+        pb.textContent = e.pinned ? 'Unpin' : 'Keep praying for this';
+        pb.onclick = () => updateEntry(e.id, { pinned: !e.pinned });
+        acts.append(pb);
+      }
+      m.append(tm, p, acts); box.append(m);
     });
     if (scroll) requestAnimationFrame(() => { box.scrollTop = box.scrollHeight; });
   }
   $('tEarlier').addEventListener('click', () => openJournal({ tab: 'talk' }));
+  const PIN_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 4 4H6l4-4-1-6zM12 14v7"/></svg>';
+  function renderPins(){
+    const box = $('pins'); box.textContent = '';
+    const pins = entries.filter(e => e.kind === 'talk' && e.pinned && !e.answered).sort((a, b) => a.ts - b.ts);
+    box.hidden = pins.length === 0;
+    if (!pins.length) return;
+    const h = document.createElement('h4'); h.textContent = 'Still praying for'; box.append(h);
+    if (pinHash && !unlocked) {
+      const p = document.createElement('p'); p.className = 'tempty'; p.style.padding = '4px 0 10px';
+      p.textContent = pins.length === 1 ? 'One pinned prayer. Open My Journal to see it.' : `${pins.length} pinned prayers. Open My Journal to see them.`;
+      box.append(p); return;
+    }
+    pins.forEach(e => {
+      const d = document.createElement('div'); d.className = 'pin';
+      const p = document.createElement('p'); p.textContent = e.text;
+      const since = document.createElement('div'); since.className = 'since';
+      const days = Math.floor((Date.now() - e.ts) / 86400000);
+      since.textContent = days < 1 ? 'Pinned today' : `Praying since ${fmtDate(e.ts)}`;
+      const acts = document.createElement('div'); acts.className = 'acts';
+      const ans = document.createElement('button'); ans.type = 'button'; ans.className = 'jlink'; ans.textContent = 'He answered';
+      const un = document.createElement('button'); un.type = 'button'; un.className = 'jlink'; un.textContent = 'Unpin';
+      un.onclick = () => updateEntry(e.id, { pinned: false });
+      ans.onclick = () => {
+        const f = document.createElement('form'); f.className = 'ansform';
+        const tx = document.createElement('textarea'); tx.placeholder = 'How did He answer? (optional)'; tx.maxLength = 1000;
+        const r = document.createElement('div'); r.className = 'rowb';
+        const s = document.createElement('button'); s.type = 'submit'; s.className = 'jbtn'; s.textContent = 'Set this stone';
+        const c = document.createElement('button'); c.type = 'button'; c.className = 'jlink'; c.textContent = 'Cancel'; c.onclick = () => renderPins();
+        r.append(s, c); f.append(tx, r);
+        f.addEventListener('submit', ev => { ev.preventDefault(); updateEntry(e.id, { answered: true, pinned: false, answerNote: tx.value.trim(), answeredTs: Date.now() }); if (soundOn && initAudio()) chime(.6); });
+        acts.replaceWith(f); tx.focus();
+      };
+      acts.append(ans, un);
+      d.append(p, since, acts); box.append(d);
+    });
+  }
 
   // ---------- Embers (burdens) & counts ----------
   function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -1000,7 +1075,7 @@
   }
   async function updateEntry(id, patch){
     entries = entries.map(e => e.id === id ? { ...e, ...patch } : e);
-    renderJournal();
+    renderJournal(); if (mode === 'talk') renderThread(false);
     if (cloud) { try { await cloud.entries.doc(id).update(patch); return; } catch(e){} }
     writeLocal(entries);
   }
@@ -1074,7 +1149,7 @@
     const r = el('div', 'rowb'); const save = el('button', 'jbtn', e.answered ? 'Save' : 'Set this stone'); save.type = 'submit';
     const cancel = el('button', 'jlink', 'Cancel'); cancel.type = 'button'; cancel.onclick = () => renderJournal();
     r.append(save, cancel); f.append(lab, t, r);
-    f.addEventListener('submit', ev => { ev.preventDefault(); updateEntry(e.id, { answered: true, answerNote: t.value.trim(), answeredTs: e.answeredTs || Date.now() }); });
+    f.addEventListener('submit', ev => { ev.preventDefault(); updateEntry(e.id, { answered: true, pinned: false, answerNote: t.value.trim(), answeredTs: e.answeredTs || Date.now() }); });
     li.querySelector('.jactions').replaceWith(f);
     t.focus();
   }
@@ -1149,6 +1224,7 @@
       if (e.ref) meta.append(el('span', 'ref', e.ref));
       if (e.kind === 'thanks') meta.append(el('span', 'badge thx', 'Thanks'));
       if (e.kind === 'prayer' && jTab !== 'people') meta.append(el('span', 'badge pray', 'For ' + (e.person || 'someone')));
+      if (e.kind === 'talk' && e.pinned && !e.answered) meta.append(el('span', 'badge thx', 'Pinned'));
       if (e.answered) meta.append(el('span', 'badge ans', 'Answered'));
       const acts = el('div', 'jactions');
       if (e.kind !== 'thanks') {
@@ -1157,6 +1233,7 @@
         acts.append(a);
         if (e.answered) { const u = el('button', 'jlink', 'Unmark'); u.type = 'button'; u.onclick = () => updateEntry(e.id, { answered: false }); acts.append(u); }
       }
+      if (e.kind === 'talk' && !e.answered) { const pb = el('button', 'jlink', e.pinned ? 'Unpin' : 'Keep praying for this'); pb.type = 'button'; pb.onclick = () => updateEntry(e.id, { pinned: !e.pinned }); acts.append(pb); }
       if (e.answered) { const sh = el('button', 'jlink', 'Share testimony'); sh.type = 'button'; sh.onclick = () => openShare(e); acts.append(sh); }
       const rm = el('button', 'jlink danger', 'Remove'); rm.type = 'button'; rm.onclick = () => confirmRemove(acts, e.id);
       acts.append(rm);
