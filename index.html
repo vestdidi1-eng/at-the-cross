@@ -98,7 +98,7 @@
   /* The sheet: paper tabs + card */
   .sheet{position:relative;z-index:1;width:100%;margin-top:10px;filter:drop-shadow(0 28px 40px rgba(6,6,18,.5)) drop-shadow(0 6px 12px rgba(6,6,18,.25))}
   .modes{display:flex;gap:4px;padding:0 10px}
-  .modes button{flex:1;min-height:44px;padding:0 6px;border:none;border-radius:12px 12px 0 0;cursor:pointer;
+  .modes button{flex:1;min-height:46px;padding:4px 6px;line-height:1.15;border:none;border-radius:12px 12px 0 0;cursor:pointer;
     background:rgba(245,238,225,.16);color:rgba(245,238,225,.82);font-size:14px;font-weight:500;letter-spacing:.005em;
     transition:background .25s,color .25s}
   .modes button:hover{background:rgba(245,238,225,.24)}
@@ -106,6 +106,17 @@
   .card{width:100%;background:var(--linen);background-image:var(--paper-grain);color:var(--ink);border-radius:14px;padding:22px 20px 18px;
     transition:opacity .5s ease,transform .5s var(--ease)}
   .card.away{opacity:0;transform:translateY(14px);pointer-events:none}
+  .talk{margin-bottom:6px}
+  .thread{max-height:42vh;max-height:42svh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0 -4px 14px;padding:0 4px}
+  .tday{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink-3);margin:2px 0 6px}
+  .tmsg{padding:9px 0 11px;border-bottom:1px solid rgba(43,36,32,.08)}
+  .tmsg:last-child{border-bottom:none}
+  .tmsg time{display:block;font-size:12.5px;color:var(--ink-3);margin-bottom:3px;font-variant-numeric:tabular-nums}
+  .tmsg p{font-family:var(--serif);font-size:17.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+  .tmsg.new{animation:tnew 1.6s ease}
+  @keyframes tnew{0%{background:rgba(240,201,121,.35)}100%{background:transparent}}
+  .tempty{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.6;color:var(--ink-2);padding:2px 0 6px}
+  .tmore{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-3);margin:-6px 0 8px}
   .card .q{display:block;font-family:var(--serif);font-size:21px;line-height:1.3;font-weight:400;margin-bottom:12px;color:var(--ink)}
   .who{margin-bottom:16px}
   .who input{width:100%;min-height:46px;border:1px solid rgba(43,36,32,.16);border-radius:10px;background:rgba(255,255,255,.55);padding:0 14px;font-family:var(--serif);font-size:18px;color:var(--ink);-webkit-appearance:none;appearance:none}
@@ -182,6 +193,7 @@
   .jitem::before{content:'';position:absolute;left:0;top:19px;width:3px;height:calc(100% - 34px);min-height:18px;border-radius:2px;background:var(--gold-deep)}
   .jitem.k-thanks::before{background:#E7C58A}
   .jitem.k-prayer::before{background:#8FA8D6}
+  .jitem.k-talk::before{background:#C7979E}
   .jitem.flash{animation:flash 2s ease}
   @keyframes flash{0%,40%{background:rgba(240,201,121,.25)}100%{background:transparent}}
   .jmeta{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
@@ -246,6 +258,7 @@
   .kpages img{flex:none;width:72%;max-width:260px;scroll-snap-align:center;border-radius:6px;box-shadow:0 8px 20px rgba(0,0,0,.22);-webkit-touch-callout:default}
 
   @media (max-width:420px){
+    .modes button{font-size:12.5px}
     .row .lay{flex:1 1 100%}
     .pill .lbl{display:none}
     .modes{padding:0 6px}
@@ -436,6 +449,7 @@
     <button type="button" id="modeLay" aria-pressed="true">Lay it down</button>
     <button type="button" id="modeThanks" aria-pressed="false">Give thanks</button>
     <button type="button" id="modePray" aria-pressed="false">Pray for others</button>
+    <button type="button" id="modeTalk" aria-pressed="false">Talk with God</button>
   </div>
 
   <form class="card" id="card" autocomplete="off">
@@ -445,6 +459,10 @@
       <div class="people" id="people"></div>
     </div>
     <label class="q" for="burden" id="qLabel">What are you carrying today?</label>
+    <div class="talk" id="talk" hidden>
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <div class="tmore"><span id="tCount"></span><button type="button" class="jlink" id="tEarlier">Earlier days</button></div>
+    </div>
     <div class="chips" id="chips" role="group" aria-label="What kind of burden is it?"></div>
     <div class="twrap">
       <textarea id="burden" placeholder="A worry, a fear, a hurt, a regret… write it here and give it to Him." maxlength="1000" enterkeyhint="enter"></textarea>
@@ -455,7 +473,7 @@
     <div class="partial" id="partial"></div>
     <div class="already" id="already" hidden></div>
     <div class="row">
-      <label class="keep"><input type="checkbox" id="keepIt" checked> Keep in My Journal</label>
+      <label class="keep" id="keepRow"><input type="checkbox" id="keepIt" checked> Keep in My Journal</label>
       <button type="submit" class="lay" id="layBtn" disabled>Leave it at the cross</button>
     </div>
     <p class="tip" id="tip"></p>
@@ -492,6 +510,7 @@
     <button class="jtab" role="tab" data-tab="burden" aria-selected="false">Laid down</button>
     <button class="jtab" role="tab" data-tab="thanks" aria-selected="false">Thanks</button>
     <button class="jtab" role="tab" data-tab="people" aria-selected="false">People</button>
+    <button class="jtab" role="tab" data-tab="talk" aria-selected="false">With God</button>
     <button class="jtab" role="tab" data-tab="stones" aria-selected="false">Stones of remembrance</button>
   </div>
   <div class="jscroll" id="jBody">
@@ -638,7 +657,8 @@
   const MODE_TEXT = {
     lay: ['What are you carrying today?', 'A worry, a fear, a hurt, a regret… write it here and give it to Him.', 'Leave it at the cross'],
     thanks: ['What are you thankful for?', 'A blessing, an answered prayer, a small good thing today…', 'Offer it with thanks'],
-    pray: ['What are you bringing to Him for them?', 'Their healing, their work, their heart, their walk with God…', 'Carry it to the cross']
+    pray: ['What are you bringing to Him for them?', 'Their healing, their work, their heart, their walk with God…', 'Carry it to the cross'],
+    talk: ['Talk with God through your day', 'Lord…', 'Pray']
   };
   function renderPeople(){
     const box = $('people'); box.textContent = '';
@@ -656,7 +676,9 @@
   $('person').addEventListener('input', renderPeople);
   function setMode(m){
     mode = m;
-    $('modeLay').setAttribute('aria-pressed', m === 'lay'); $('modeThanks').setAttribute('aria-pressed', m === 'thanks'); $('modePray').setAttribute('aria-pressed', m === 'pray');
+    ['Lay', 'Thanks', 'Pray', 'Talk'].forEach(k => $('mode' + k).setAttribute('aria-pressed', m === k.toLowerCase()));
+    $('talk').hidden = m !== 'talk'; $('keepRow').hidden = m === 'talk';
+    if (m === 'talk') renderThread(true);
     chipsEl.hidden = m !== 'lay';
     $('who').hidden = m !== 'pray'; if (m === 'pray') renderPeople();
     $('qLabel').textContent = MODE_TEXT[m][0]; ta.placeholder = MODE_TEXT[m][1]; btn.textContent = MODE_TEXT[m][2];
@@ -666,6 +688,7 @@
   $('modeLay').addEventListener('click', () => setMode('lay'));
   $('modeThanks').addEventListener('click', () => setMode('thanks'));
   $('modePray').addEventListener('click', () => setMode('pray'));
+  $('modeTalk').addEventListener('click', () => setMode('talk'));
 
   // Enter submits on keyboards; on phones Enter is a new line and the button lays it down.
   $('tip').textContent = coarse
@@ -714,6 +737,14 @@
     e.preventDefault();
     const text = ta.value.trim();
     if (!text || busy) return;
+    if (mode === 'talk') {
+      keepEntry({ text, kind: 'talk', ref: null, cat: null, person: null });
+      ta.value = ''; ta.dispatchEvent(new Event('input')); $('partial').textContent = '';
+      if (dict && dict.active()) dict.stop().catch(() => {});
+      if (soundOn && initAudio()) talkChime();
+      renderThread(true, true);
+      return;
+    }
     busy = true; btn.disabled = true;
     $('already').hidden = true; $('partial').textContent = '';
     $('verse').classList.remove('show');
@@ -785,6 +816,37 @@
     $('verse').classList.add('show');
   }
 
+  // ---------- Talk with God: today's conversation ----------
+  const sameDay = (a, b) => { const x = new Date(a), y = new Date(b); return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth() && x.getDate() === y.getDate(); };
+  const fmtTime = ts => { try { return new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); } catch(e){ return ''; } };
+  function renderThread(scroll, fresh){
+    const box = $('thread'); if (!box) return;
+    const all = entries.filter(e => e.kind === 'talk');
+    const today = all.filter(e => sameDay(e.ts, Date.now())).sort((a, b) => a.ts - b.ts);
+    box.textContent = '';
+    $('tEarlier').hidden = !all.some(e => !sameDay(e.ts, Date.now()));
+    $('tCount').textContent = today.length ? (today.length === 1 ? 'One prayer today' : `${today.length} prayers today`) : '';
+    if (pinHash && !unlocked) {
+      const p = document.createElement('p'); p.className = 'tempty';
+      p.textContent = today.length ? 'Your prayers from today are kept in My Journal behind your passcode. You can keep praying here.' : 'Start your conversation with Him today. Come back and add to it anytime.';
+      box.append(p); return;
+    }
+    if (!today.length) {
+      const p = document.createElement('p'); p.className = 'tempty';
+      p.textContent = 'Start your conversation with Him today. Come back and add to it anytime, and it will all be here.';
+      box.append(p); return;
+    }
+    const d = document.createElement('div'); d.className = 'tday'; d.textContent = 'Today'; box.append(d);
+    today.forEach((e, i) => {
+      const m = document.createElement('div'); m.className = 'tmsg' + (fresh && i === today.length - 1 ? ' new' : '');
+      const tm = document.createElement('time'); tm.textContent = fmtTime(e.ts);
+      const p = document.createElement('p'); p.textContent = e.text;
+      m.append(tm, p); box.append(m);
+    });
+    if (scroll) requestAnimationFrame(() => { box.scrollTop = box.scrollHeight; });
+  }
+  $('tEarlier').addEventListener('click', () => openJournal({ tab: 'talk' }));
+
   // ---------- Embers (burdens) & counts ----------
   function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   const emberG = $('emberG');
@@ -820,6 +882,7 @@
     const sentence = parts.length <= 1 ? parts.join('') : parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
     $('count').textContent = sentence ? sentence.charAt(0).toUpperCase() + sentence.slice(1) + '.' : '';
     $('jCount').textContent = entries.length ? String(entries.length) : '';
+    if (mode === 'talk') renderThread(false);
     $('lookback').hidden = entries.length === 0;
   }
 
@@ -883,6 +946,10 @@
       const g = actx.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.07 * scale, t + 1.2); g.gain.exponentialRampToValueAtTime(.0001, t + 6);
       o.connect(lp).connect(g); out(g, .5); o.start(t); o.stop(t + 6.2);
     });
+  }
+  function talkChime(){
+    if (!soundOn || !actx) return;
+    const t = actx.currentTime + .02; bell(659.25, t, .05, 2.4); bell(987.77, t + .12, .035, 2.2);
   }
   function thanksChime(){
     if (!soundOn || !actx) return;
@@ -1017,12 +1084,13 @@
     const list = $('jList'), top = $('jTop'), empty = $('jEmpty');
     list.textContent = ''; top.textContent = '';
     document.querySelectorAll('.jtab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === jTab));
-    const burdens = entries.filter(e => e.kind === 'burden'), thanks = entries.filter(e => e.kind === 'thanks'), prayers = entries.filter(e => e.kind === 'prayer');
+    const burdens = entries.filter(e => e.kind === 'burden'), thanks = entries.filter(e => e.kind === 'thanks'), prayers = entries.filter(e => e.kind === 'prayer'), talks = entries.filter(e => e.kind === 'talk');
     const stones = entries.filter(e => e.kind !== 'thanks' && e.answered).sort((a, b) => (b.answeredTs || b.ts) - (a.answeredTs || a.ts));
     const bits = [];
     if (burdens.length) bits.push(`${burdens.length} laid down`);
     if (prayers.length) bits.push(prayers.length === 1 ? '1 prayer for others' : `${prayers.length} prayers for others`);
     if (thanks.length) bits.push(thanks.length === 1 ? '1 thanksgiving' : `${thanks.length} thanksgivings`);
+    if (talks.length) bits.push(talks.length === 1 ? '1 prayer with God' : `${talks.length} prayers with God`);
     if (stones.length) bits.push(`${stones.length} answered`);
     $('jSub').textContent = bits.length ? (bits.length === 1 ? bits[0] : bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1]).replace(/^./, c => c.toUpperCase()) : 'What you have given Him';
 
@@ -1037,9 +1105,9 @@
         const li = el('li', 'stone'); li.dataset.id = e.id;
         const ic = el('div'); ic.innerHTML = STONE_SVG;
         const body = el('div'); body.style.flex = '1';
-        body.append(el('div', 'when', `Answered ${fmtDate(e.answeredTs || e.ts)}` + (e.person ? `, a prayer for ${e.person}` : e.cat ? `, ${catLabel(e.cat).toLowerCase()}` : '')));
+        body.append(el('div', 'when', `Answered ${fmtDate(e.answeredTs || e.ts)}` + (e.person ? `, a prayer for ${e.person}` : e.kind === 'talk' ? ', a prayer of your own' : e.cat ? `, ${catLabel(e.cat).toLowerCase()}` : '')));
         body.append(el('div', 'how' + (e.answerNote ? '' : ' none'), e.answerNote || 'He answered.'));
-        body.append(el('div', 'orig', `${e.kind === 'prayer' ? 'What you prayed' : 'What you laid down'} on ${fmtDate(e.ts)}`));
+        body.append(el('div', 'orig', `${e.kind === 'burden' ? 'What you laid down' : 'What you prayed'} on ${fmtDate(e.ts)}`));
         body.append(foldable(e.text));
         const acts = el('div', 'jactions');
         const ed = el('button', 'jlink', 'Edit'); ed.type = 'button'; ed.onclick = () => answerForm(li, e);
@@ -1049,14 +1117,25 @@
       }
       return;
     }
-    const shown = jTab === 'burden' ? burdens : jTab === 'thanks' ? thanks : jTab === 'people' ? prayers : entries;
+    const shown = jTab === 'burden' ? burdens : jTab === 'thanks' ? thanks : jTab === 'people' ? prayers : jTab === 'talk' ? talks : entries.filter(e => e.kind !== 'talk');
     empty.hidden = shown.length > 0;
     empty.textContent = jTab === 'thanks' ? 'Nothing here yet. Switch to “Give thanks” to offer something with gratitude.'
       : jTab === 'people' ? 'Nothing here yet. Switch to “Pray for others” to carry someone you love to the cross.'
+      : jTab === 'talk' ? 'Nothing here yet. Switch to “Talk with God” to pray through your day.'
       : 'Nothing kept here yet. What you lay down with “Keep in My Journal” on will rest here.';
     let groupKey = null, groupList = list;
     const ordered = jTab === 'people' ? [...shown].sort((a, b) => (a.person || '').localeCompare(b.person || '') || b.ts - a.ts) : shown;
     for (const e of ordered) {
+      if (jTab === 'talk') {
+        const dk = new Date(e.ts).toDateString();
+        if (dk !== groupKey) {
+          groupKey = dk;
+          const n = shown.filter(x => new Date(x.ts).toDateString() === dk).length;
+          const g = el('li', 'pgroup'); const h = el('h3', null, sameDay(e.ts, Date.now()) ? 'Today' : fmtDate(e.ts));
+          h.append(el('span', null, n === 1 ? '1 prayer' : `${n} prayers`));
+          const ul = el('ul', 'jlist'); g.append(h, ul); list.append(g); groupList = ul;
+        }
+      }
       if (jTab === 'people' && (e.person || '').toLowerCase() !== groupKey) {
         groupKey = (e.person || '').toLowerCase();
         const n = shown.filter(x => (x.person || '').toLowerCase() === groupKey);
@@ -1065,7 +1144,7 @@
         const ul = el('ul', 'jlist'); g.append(h, ul); list.append(g); groupList = ul;
       }
       const li = el('li', 'jitem k-' + e.kind); li.dataset.id = e.id;
-      const meta = el('div', 'jmeta', fmtDate(e.ts));
+      const meta = el('div', 'jmeta', e.kind === 'talk' && jTab === 'talk' ? fmtTime(e.ts) : e.kind === 'talk' ? `${fmtDate(e.ts)}, ${fmtTime(e.ts)}` : fmtDate(e.ts));
       if (e.cat) meta.append(el('span', null, catLabel(e.cat)));
       if (e.ref) meta.append(el('span', 'ref', e.ref));
       if (e.kind === 'thanks') meta.append(el('span', 'badge thx', 'Thanks'));
@@ -1103,6 +1182,7 @@
   }
   function openJournal(opts = {}){
     unlocked = !pinHash; pendingFocus = opts.focusId || null;
+    if (opts.tab) jTab = opts.tab;
     renderJournal(); renderFoot(); $('pinForm').hidden = true;
     showLocked(!unlocked);
     jEl.hidden = false; jBack.hidden = false; document.documentElement.classList.add('locked');
@@ -1112,7 +1192,7 @@
   function closeJournal(){
     jEl.classList.remove('open'); jBack.classList.remove('open'); unlocked = false;
     document.documentElement.classList.remove('locked');
-    setTimeout(() => { jEl.hidden = true; jBack.hidden = true; jTab = 'all'; renderJournal(); }, 450);
+    setTimeout(() => { jEl.hidden = true; jBack.hidden = true; jTab = 'all'; renderJournal(); if (mode === 'talk') renderThread(true); }, 450);
   }
   $('jOpen').addEventListener('click', () => openJournal());
   $('jOpen2').addEventListener('click', () => openJournal());
@@ -1376,7 +1456,7 @@
     const TX = 240, TW = KW - TX - 170;
     if (d.stones.length) {
       const stoneParts = (x, e) => {
-        const label = e.kind === 'prayer' ? (withNames && e.person ? `A prayer for ${e.person}` : 'A prayer for someone I love') : (e.cat ? catLabel(e.cat) : 'Something I laid down');
+        const label = e.kind === 'prayer' ? (withNames && e.person ? `A prayer for ${e.person}` : 'A prayer for someone I love') : e.kind === 'talk' ? 'A prayer of my own' : (e.cat ? catLabel(e.cat) : 'Something I laid down');
         const L = [{ l: `Answered ${fmtDate(e.answeredTs || e.ts)}`, font: `500 24px ${SANS}`, lh: 40, color: INK2 }, { l: label, font: `italic 26px ${SERIF}`, lh: 44, color: INK2 }];
         textBlock(x, e.answerNote || 'He answered.', `400 34px ${SERIF}`, 54, TW).forEach(o => L.push({ ...o, color: INK }));
         if (withPrayed) { L.push({ l: '', font: `400 10px ${SANS}`, lh: 16, color: INK }); textBlock(x, 'What I prayed: ' + e.text, `italic 26px ${SERIF}`, 42, TW).forEach(o => L.push({ ...o, color: INK3 })); }
